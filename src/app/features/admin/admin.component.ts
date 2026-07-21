@@ -557,27 +557,65 @@ export class AdminComponent implements OnInit {
       return;
     }
 
-    const blocks = this.rawTxtInput.split(/\n\s*\n/).filter(b => b.trim().length > 0);
-    const parsedSlides: WodItem[] = blocks.map(block => {
-      const lines = block.trim().split('\n');
-      const firstLine = lines[0].trim();
+    const raw = this.rawTxtInput.trim();
+    const daySeparatorRegex = /-{3,}\s*([A-Za-záéíóúÁÉÍÓÚ]+)\s*-{3,}/g;
+    const parsedSlides: WodItem[] = [];
 
-      if (lines.length === 1) {
-        return { titulo: 'WOD', contenido: firstLine };
-      }
+    if (daySeparatorRegex.test(raw)) {
+      // Si el texto incluye separadores de día (------------------------Lunes---------------------------)
+      const parts = raw.split(/-{3,}\s*([A-Za-záéíóúÁÉÍÓÚ]+)\s*-{3,}/);
+      for (let i = 1; i < parts.length; i += 2) {
+        const dayName = parts[i].trim();
+        const dayContent = parts[i + 1] ? parts[i + 1].trim() : '';
+        if (!dayContent) continue;
 
-      if (firstLine.length <= 40) {
-        return {
-          titulo: firstLine.replace(/^[#*-\s]+/, '').replace(/[:*]+$/, '').trim(),
-          contenido: lines.slice(1).join('\n').trim()
-        };
-      } else {
-        return {
-          titulo: 'WOD',
-          contenido: block.trim()
-        };
+        const headerRegex = /^(Warmup|WARM-UP|Gymnastics|Custom Metcon|Weightlifting|Accesorio|OPTIONAL ACCESSORY)(\s*\(.*?\))?$/i;
+        const lines = dayContent.split('\n');
+
+        let curTitle = '';
+        let curLines: string[] = [];
+
+        for (const line of lines) {
+          const trimmed = line.strip ? line.trim() : line;
+          if (headerRegex.test(trimmed)) {
+            if (curTitle) {
+              parsedSlides.push({ titulo: `${dayName.toUpperCase()} - ${curTitle}`, contenido: curLines.join('\n').trim() });
+              curLines = [];
+            }
+            curTitle = trimmed;
+          } else {
+            if (!curTitle && trimmed) {
+              curTitle = 'WOD';
+            }
+            curLines.push(line);
+          }
+        }
+        if (curTitle) {
+          parsedSlides.push({ titulo: `${dayName.toUpperCase()} - ${curTitle}`, contenido: curLines.join('\n').trim() });
+        }
       }
-    });
+    } else {
+      // Bloques separados por doble salto de línea
+      const blocks = raw.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+      for (const block of blocks) {
+        const lines = block.trim().split('\n');
+        const firstLine = lines[0].trim();
+
+        if (lines.length === 1) {
+          parsedSlides.push({ titulo: 'WOD', contenido: firstLine });
+        } else if (firstLine.length <= 40) {
+          parsedSlides.push({
+            titulo: firstLine.replace(/^[#*-\s]+/, '').replace(/[:*]+$/, '').trim(),
+            contenido: lines.slice(1).join('\n').trim()
+          });
+        } else {
+          parsedSlides.push({
+            titulo: 'WOD',
+            contenido: block.trim()
+          });
+        }
+      }
+    }
 
     if (parsedSlides.length > 0) {
       this.slides = parsedSlides;
