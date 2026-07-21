@@ -50,14 +50,24 @@ jobs:
             }
           };
           EOF
+          cp src/environments/environment.prod.ts src/environments/environment.ts
 
       - name: Build Project
         run: npx ng build --configuration production --base-href /${{ github.event.repository.name }}/
 
+      - name: Determine Output Path
+        id: output_path
+        run: |
+          if [ -d "./dist/wod-tv-angular/browser" ]; then
+            echo "BUILD_PATH=./dist/wod-tv-angular/browser" >> $GITHUB_ENV
+          else
+            echo "BUILD_PATH=./dist/wod-tv-angular" >> $GITHUB_ENV
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist/wod-tv-angular/browser'
+          path: ${{ env.BUILD_PATH }}
 
       - name: Deploy to GitHub Pages
         id: deployment
