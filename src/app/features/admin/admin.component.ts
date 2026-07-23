@@ -226,7 +226,7 @@ import { WODS_DATA } from '../../core/data/wods.data';
               <textarea [(ngModel)]="rawWeeklyTxt" style="height:150px;" placeholder="------------------------Lunes---------------------------&#10;Warmup&#10;...&#10;Custom Metcon&#10;..."></textarea>
             </div>
             <button class="btn-action" style="background:#0088cc;" (click)="convertAndApplyWeeklyTxt()">
-              ⚡ Parsear Texto a la Semana
+              ⚡ Pasar Texto a la Semana
             </button>
           </div>
         </div>

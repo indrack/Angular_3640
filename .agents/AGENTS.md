@@ -45,5 +45,5 @@
   - Se admiten N cantidad de bloques por día (Warmup, Skill, Strength, Metcon, Accesorio, Finisher).
   - La interfaz de administración en `/admin` incluye la opción **`📅 WODS DE LA SEMANA`** con vista previa compacta por pestañas de días y distintivos de colores.
 - **Herramientas de Conversión**:
-  - **Vía Web**: Panel `/admin` -> `📄 Importar / Parsear Rutina Semanal (.TXT)`.
+  - **Vía Web**: Panel `/admin` -> `📄 Importar / Pasar Rutina Semanal (.TXT)`.
   - **Vía CLI**: `python3 scripts/update_wods.py <archivo.txt> [--wgirls]`.
