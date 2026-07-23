@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, onValue, Database } from 'firebase/database';
-import { WodItem, ActiveMode, DayName } from '../models/wod.model';
+import { WodItem, ActiveMode, DayName, DayWods } from '../models/wod.model';
 import { WODS_DATA } from '../data/wods.data';
 import { WGIRLS_DATA } from '../data/wgirls.data';
 import { FIREBASE_CONFIG } from '../config/firebase.config';

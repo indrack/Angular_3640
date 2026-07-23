@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence, Auth, User } from 'firebase/auth';
 import { getDatabase, ref, set, get, Database } from 'firebase/database';
+import { FIREBASE_CONFIG } from '../../core/config/firebase.config';
 import { WodItem, DayWods, DayName } from '../../core/models/wod.model';
 import { WODS_DATA } from '../../core/data/wods.data';
 
