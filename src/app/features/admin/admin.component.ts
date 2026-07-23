@@ -576,7 +576,7 @@ export class AdminComponent implements OnInit {
         let curLines: string[] = [];
 
         for (const line of lines) {
-          const trimmed = line.strip ? line.trim() : line;
+          const trimmed = line.trim();
           if (headerRegex.test(trimmed)) {
             if (curTitle) {
               parsedSlides.push({ titulo: `${dayName.toUpperCase()} - ${curTitle}`, contenido: curLines.join('\n').trim() });
