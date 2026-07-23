@@ -253,15 +253,16 @@ import { WODS_DATA } from '../../core/data/wods.data';
   styles: [`
     .admin-mode {
       min-height: 100vh;
-      width: 100vw;
+      width: 100%;
+      box-sizing: border-box;
       background: #000;
       color: #fff;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 20px 15px;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      user-select: text;
     }
 
     .admin-logo {
