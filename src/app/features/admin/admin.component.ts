@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence, Auth, User } from 'firebase/auth';
 import { getDatabase, ref, set, get, Database } from 'firebase/database';
-import { FIREBASE_CONFIG } from '../../core/config/firebase.config';
-import { WodItem } from '../../core/models/wod.model';
+import { WodItem, DayWods, DayName } from '../../core/models/wod.model';
+import { WODS_DATA } from '../../core/data/wods.data';
 
 @Component({
   selector: 'app-admin',
@@ -59,6 +59,11 @@ import { WodItem } from '../../core/models/wod.model';
         <div class="selection-card" (click)="selectLocation('miraflores')">
           <h3>MIRAFLORES (TV 7)</h3>
           <p>Control Remoto Botón 7</p>
+        </div>
+
+        <div class="selection-card weekly-card" (click)="openWeeklyManager()">
+          <h3 style="color:#00e5ff;">📅 WODS DE LA SEMANA</h3>
+          <p>Ver rutina actual por días, editar o importar .TXT semanal</p>
         </div>
 
         <button class="btn-action btn-secondary" (click)="logout()">Cerrar Sesión</button>
@@ -153,6 +158,94 @@ import { WodItem } from '../../core/models/wod.model';
           {{ statusMsg() }}
         </div>
         <button class="btn-action btn-secondary" (click)="goToTv()">Ver Pantalla WOD / Salir</button>
+      </div>
+
+      <!-- STEP 5: WEEKLY MANAGER -->
+      <div *ngIf="step() === 'weekly'" class="admin-container editor-container">
+        <h2 style="color:#fff; margin-bottom:5px;">📅 GESTIÓN WODS DE LA SEMANA</h2>
+        <p class="editor-label">VISTA COMPACTA Y PROGRAMACIÓN DE LA SEMANA</p>
+
+        <!-- DAY TABS -->
+        <div class="day-tabs">
+          <button *ngFor="let day of daysList"
+                  class="day-tab-btn"
+                  [class.active]="selectedWeeklyDay() === day"
+                  (click)="selectedWeeklyDay.set(day)">
+            {{ day.toUpperCase() }}
+            <span class="block-count-badge">{{ (weeklyWodsData[day] || []).length }}</span>
+          </button>
+        </div>
+
+        <!-- COMPACT DAY VIEW -->
+        <div class="compact-day-card">
+          <div class="compact-day-header">
+            <h3>{{ selectedWeeklyDay().toUpperCase() }}</h3>
+            <span style="color:#aaa; font-size:0.85em;">
+              {{ (weeklyWodsData[selectedWeeklyDay()] || []).length }} bloque(s) programado(s)
+            </span>
+          </div>
+
+          <div *ngIf="(weeklyWodsData[selectedWeeklyDay()] || []).length === 0" class="empty-day-msg">
+            No hay ejercicios programados para este día. Puedes importar desde .TXT o agregar un bloque.
+          </div>
+
+          <div *ngFor="let block of weeklyWodsData[selectedWeeklyDay()]; let bi = index" class="compact-block-item">
+            <div class="block-badge-header">
+              <span class="block-type-badge" [ngStyle]="{
+                'color': getBlockBadgeInfo(block.titulo).color,
+                'background': getBlockBadgeInfo(block.titulo).bg,
+                'border-color': getBlockBadgeInfo(block.titulo).color
+              }">
+                {{ getBlockBadgeInfo(block.titulo).label }}
+              </span>
+              <input type="text" [(ngModel)]="block.titulo" class="compact-title-input" placeholder="Título de bloque...">
+              <button (click)="removeWeeklyBlock(selectedWeeklyDay(), bi)" class="btn-remove-compact" title="Eliminar bloque">✕</button>
+            </div>
+            <textarea [(ngModel)]="block.contenido" class="compact-content-textarea" placeholder="Contenido del ejercicio..."></textarea>
+          </div>
+
+          <button class="btn-action btn-secondary dashed-btn" style="margin-top:15px;" (click)="addWeeklyBlock(selectedWeeklyDay())">
+            + Agregar bloque a {{ selectedWeeklyDay().toUpperCase() }}
+          </button>
+        </div>
+
+        <!-- IMPORT WEEKLY TXT BOX -->
+        <div class="txt-import-box" style="margin-top:20px;">
+          <button class="btn-action btn-secondary" (click)="showWeeklyTxtImport.update(v => !v)">
+            {{ showWeeklyTxtImport() ? '✕ Cerrar Importador .TXT Semanal' : '📄 Importar / Parsear Rutina Semanal (.TXT)' }}
+          </button>
+
+          <div *ngIf="showWeeklyTxtImport()" class="txt-import-content">
+            <p style="color:#aaa; font-size:0.85em; margin:10px 0; text-align:left;">
+              Pega el texto de toda la semana usando delimitadores <code>------------------------[Día]---------------------------</code>.
+              Se detectarán automáticamente Calentamiento, Skill, Fuerza, WOD, Accesorios, etc.
+            </p>
+            <div class="input-group">
+              <input type="file" (change)="onWeeklyFileUpload($event)" accept=".txt" style="margin-bottom:10px;">
+              <textarea [(ngModel)]="rawWeeklyTxt" style="height:150px;" placeholder="------------------------Lunes---------------------------&#10;Warmup&#10;...&#10;Custom Metcon&#10;..."></textarea>
+            </div>
+            <button class="btn-action" style="background:#0088cc;" (click)="convertAndApplyWeeklyTxt()">
+              ⚡ Parsear Texto a la Semana
+            </button>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <button class="btn-action" [disabled]="isPublishing()" (click)="saveWeeklyWodsToFirebase()">
+          ☁️ {{ isPublishing() ? 'PUBLICANDO...' : 'PUBLICAR RUTINA SEMANAL EN TV EN VIVO' }}
+        </button>
+
+        <button class="btn-action btn-secondary" (click)="copyWeeklyTsCode()">
+          📋 Copiar Código TypeScript (wods.data.ts)
+        </button>
+
+        <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
+          {{ statusMsg() }}
+        </div>
+
+        <button class="btn-action btn-secondary" (click)="step.set('location')">
+          ⬅️ Volver a Selección de Sede
+        </button>
       </div>
     </div>
   `,
@@ -368,10 +461,138 @@ import { WodItem } from '../../core/models/wod.model';
       border-radius: 8px;
       margin-top: 10px;
     }
+
+    .weekly-card {
+      border-color: #00e5ff !important;
+    }
+    .weekly-card:hover {
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+    }
+
+    .day-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .day-tab-btn {
+      background: #111;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .day-tab-btn.active {
+      background: #0088cc;
+      color: #fff;
+      border-color: #00e5ff;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    }
+
+    .block-count-badge {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 2px 6px;
+      font-size: 0.75em;
+    }
+
+    .compact-day-card {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: left;
+    }
+
+    .compact-day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #222;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .compact-day-header h3 {
+      margin: 0;
+      color: #00e5ff;
+      font-size: 1.1em;
+    }
+
+    .empty-day-msg {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .compact-block-item {
+      background: #121212;
+      border: 1px solid #282828;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .block-badge-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .block-type-badge {
+      font-size: 0.7em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+
+    .compact-title-input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.9em;
+      font-weight: bold;
+      background: #000;
+      border: 1px solid #333;
+    }
+
+    .compact-content-textarea {
+      width: 100%;
+      height: 75px;
+      padding: 8px;
+      font-size: 0.85em;
+      background: #000;
+      border: 1px solid #222;
+      color: #ddd;
+    }
+
+    .btn-remove-compact {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 1.1em;
+      cursor: pointer;
+      padding: 0 5px;
+    }
+    .btn-remove-compact:hover { color: #ff4444; }
   `]
 })
 export class AdminComponent implements OnInit {
-  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor'>('loading');
+  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor' | 'weekly'>('loading');
   public selectedLocation = signal<'miraflores' | 'calacoto'>('miraflores');
   public selectedMode = signal<'new' | 'append'>('append');
 
@@ -386,6 +607,12 @@ export class AdminComponent implements OnInit {
 
   public showTxtImport = signal<boolean>(false);
   public rawTxtInput = '';
+
+  public daysList: DayName[] = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  public selectedWeeklyDay = signal<DayName>('lunes');
+  public weeklyWodsData: DayWods = JSON.parse(JSON.stringify(WODS_DATA));
+  public showWeeklyTxtImport = signal<boolean>(false);
+  public rawWeeklyTxt = '';
 
   public isPublishing = signal<boolean>(false);
   public statusMsg = signal<string>('');
@@ -623,6 +850,181 @@ export class AdminComponent implements OnInit {
       this.statusColor.set('#00ff00');
       this.showTxtImport.set(false);
     }
+  }
+
+  public openWeeklyManager(): void {
+    this.statusMsg.set('');
+    if (this.db) {
+      get(ref(this.db, 'weeklyWods')).then(snapshot => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.weeklyWodsData = val;
+        }
+        this.step.set('weekly');
+      }).catch(() => {
+        this.step.set('weekly');
+      });
+    } else {
+      this.step.set('weekly');
+    }
+  }
+
+  public getBlockBadgeInfo(title: string): { label: string; color: string; bg: string } {
+    if (!title) return { label: 'BLOQUE', color: '#a0a0a0', bg: 'rgba(160, 160, 160, 0.2)' };
+    const t = title.toLowerCase();
+    if (t.includes('warmup') || t.includes('warm-up') || t.includes('calentamiento')) {
+      return { label: 'WARM-UP', color: '#ff9900', bg: 'rgba(255, 153, 0, 0.2)' };
+    }
+    if (t.includes('skill') || t.includes('gymnastics') || t.includes('técnica') || t.includes('tecnica')) {
+      return { label: 'SKILL', color: '#0088cc', bg: 'rgba(0, 136, 204, 0.2)' };
+    }
+    if (t.includes('strength') || t.includes('weightlifting') || t.includes('fuerza') || t.includes('deadlift') || t.includes('clean') || t.includes('snatch') || t.includes('squat')) {
+      return { label: 'STRENGTH', color: '#3366ff', bg: 'rgba(51, 102, 255, 0.2)' };
+    }
+    if (t.includes('metcon') || t.includes('wod') || t.includes('elizabeth') || t.includes('amrap') || t.includes('tiempo') || t.includes('reps') || t.includes('rondas') || t.includes('fortime') || t.includes('for time')) {
+      return { label: 'METCON', color: '#ff0000', bg: 'rgba(255, 0, 0, 0.2)' };
+    }
+    if (t.includes('accesorio') || t.includes('finisher') || t.includes('accessory') || t.includes('quality') || t.includes('core')) {
+      return { label: 'ACCESORIO', color: '#00cc66', bg: 'rgba(0, 204, 102, 0.2)' };
+    }
+    return { label: 'BLOQUE', color: '#a0a0a0', bg: 'rgba(160, 160, 160, 0.2)' };
+  }
+
+  public addWeeklyBlock(day: DayName): void {
+    if (!this.weeklyWodsData[day]) {
+      this.weeklyWodsData[day] = [];
+    }
+    this.weeklyWodsData[day].push({ titulo: 'NUEVO BLOQUE', contenido: '' });
+  }
+
+  public removeWeeklyBlock(day: DayName, index: number): void {
+    if (this.weeklyWodsData[day]) {
+      this.weeklyWodsData[day].splice(index, 1);
+    }
+  }
+
+  public onWeeklyFileUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.rawWeeklyTxt = e.target?.result as string || '';
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  public convertAndApplyWeeklyTxt(): void {
+    if (!this.rawWeeklyTxt.trim()) {
+      alert('Por favor pega texto o sube un archivo .txt semanal');
+      return;
+    }
+    const raw = this.rawWeeklyTxt.trim();
+    const daysMap: { [key: string]: DayName } = {
+      'domingo': 'domingo', 'lunes': 'lunes', 'martes': 'martes',
+      'miercoles': 'miercoles', 'miércoles': 'miercoles',
+      'jueves': 'jueves', 'viernes': 'viernes', 'sabado': 'sabado', 'sábado': 'sabado'
+    };
+
+    const daySeparatorRegex = /-{3,}\s*([A-Za-záéíóúÁÉÍÓÚ]+)\s*-{3,}/g;
+    const newWeeklyData: DayWods = {
+      domingo: [], lunes: [], martes: [], miercoles: [], jueves: [], viernes: [], sabado: []
+    };
+
+    if (daySeparatorRegex.test(raw)) {
+      const parts = raw.split(/-{3,}\s*([A-Za-záéíóúÁÉÍÓÚ]+)\s*-{3,}/);
+      for (let i = 1; i < parts.length; i += 2) {
+        const dayRaw = parts[i].trim().toLowerCase();
+        const dayKey = daysMap[dayRaw];
+        if (!dayKey) continue;
+
+        const dayContent = parts[i + 1] ? parts[i + 1].trim() : '';
+        if (!dayContent) continue;
+
+        const lines = dayContent.split('\n');
+        const headerRegex = /^(Warmup|WARM-UP|Gymnastics|Custom Metcon|Weightlifting|Accesorio|OPTIONAL ACCESSORY|Strength|Skill|Finisher)(\s*\(.*?\))?$/i;
+
+        let curTitle: string | null = null;
+        let curLines: string[] = [];
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (headerRegex.test(trimmed)) {
+            if (curTitle !== null) {
+              newWeeklyData[dayKey].push({ titulo: curTitle, contenido: curLines.join('\n').trim() });
+              curLines = [];
+            }
+            curTitle = trimmed;
+          } else {
+            if (curTitle === null && trimmed) {
+              curTitle = 'WOD';
+            }
+            if (curTitle !== null) {
+              curLines.push(line);
+            }
+          }
+        }
+
+        if (curTitle !== null) {
+          newWeeklyData[dayKey].push({ titulo: curTitle, contenido: curLines.join('\n').trim() });
+        }
+      }
+
+      this.weeklyWodsData = newWeeklyData;
+      this.statusMsg.set('¡Rutina semanal parseada correctamente! Revisa las pestañas arriba.');
+      this.statusColor.set('#00ff00');
+      this.showWeeklyTxtImport.set(false);
+    } else {
+      alert('Formato no reconocido. Usa delimitadores como ------------------------Lunes---------------------------');
+    }
+  }
+
+  public saveWeeklyWodsToFirebase(): void {
+    if (!this.db) return;
+    this.isPublishing.set(true);
+    this.statusMsg.set('Publicando rutina semanal a Firebase...');
+    this.statusColor.set('#fff');
+
+    set(ref(this.db, 'weeklyWods'), this.weeklyWodsData)
+      .then(() => {
+        this.isPublishing.set(false);
+        this.statusMsg.set('¡RUTINA SEMANAL PUBLICADA EN TV EN VIVO CON ÉXITO!');
+        this.statusColor.set('#00ff00');
+      })
+      .catch((err) => {
+        this.isPublishing.set(false);
+        this.statusMsg.set(`Error: ${err.message}`);
+        this.statusColor.set('orange');
+      });
+  }
+
+  public copyWeeklyTsCode(): void {
+    const tsLines: string[] = ["import { DayWods } from '../models/wod.model';\n"];
+    tsLines.push("export const WODS_DATA: DayWods = {");
+
+    const daysOrder: DayName[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    for (const day of daysOrder) {
+      const items = this.weeklyWodsData[day] || [];
+      tsLines.push(`  ${day}: [`);
+      for (const item of items) {
+        const title = item.titulo.replace(/'/g, "\\'");
+        const content = item.contenido.replace(/`/g, '\\`').replace(/\${/g, '\\${');
+        tsLines.push("    {");
+        tsLines.push(`      titulo: '${title}',`);
+        tsLines.push(`      contenido: \`${content}\``);
+        tsLines.push("    },");
+      }
+      tsLines.push("  ],");
+    }
+    tsLines.push("};\n");
+
+    const fullCode = tsLines.join('\n');
+    navigator.clipboard.writeText(fullCode).then(() => {
+      alert('¡Código TypeScript copiado al portapapeles!');
+    }).catch(err => {
+      alert('Error copiando: ' + err);
+    });
   }
 
   public goToTv(): void {

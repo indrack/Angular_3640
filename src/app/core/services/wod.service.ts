@@ -21,6 +21,7 @@ export class WodService {
 
   public firebaseMiraflores = signal<WodItem[]>([]);
   public firebaseCalacoto = signal<WodItem[]>([]);
+  public firebaseWeeklyWods = signal<DayWods | null>(null);
 
   private db: Database | null = null;
 
@@ -46,6 +47,13 @@ export class WodService {
       onValue(ref(this.db, 'customWodCalacoto'), (snapshot) => {
         const val = snapshot.val();
         this.firebaseCalacoto.set(Array.isArray(val) ? val : []);
+      });
+
+      onValue(ref(this.db, 'weeklyWods'), (snapshot) => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.firebaseWeeklyWods.set(val);
+        }
       });
     } catch (e) {
       console.warn('Firebase connection unavailable or using offline mode');
@@ -79,7 +87,8 @@ export class WodService {
     }
 
     // Default normal WOD
-    const normalData = WODS_DATA[day];
+    const firebaseWeekly = this.firebaseWeeklyWods();
+    const normalData = (firebaseWeekly && firebaseWeekly[day]) ? firebaseWeekly[day] : WODS_DATA[day];
     return (normalData && normalData.length > 0)
       ? normalData
       : [{ titulo: 'DESCANSO', contenido: 'Box Cerrado / Open Box' }];
