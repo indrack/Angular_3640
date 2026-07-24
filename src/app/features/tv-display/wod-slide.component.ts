@@ -38,7 +38,7 @@ import { TvAutoScaleDirective } from '../../core/directives/tv-auto-scale.direct
     }
 
     .content-wrapper h3 {
-      font-size: 5.1em;
+      font-size: 4.8em;
       color: #ff0000;
       margin-bottom: 0.3em;
       text-transform: uppercase;
