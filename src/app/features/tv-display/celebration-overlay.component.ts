@@ -78,7 +78,7 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       </div>
 
       <!-- Glassmorphic Banner Card -->
-      <div class="celebration-card animate-card" [style.borderColor]="activePreset().badgeColor">
+      <div [class]="'celebration-card animate-card position-' + config().position" [style.borderColor]="activePreset().badgeColor">
         <div class="icon-header">
           <!-- Si es personalizada, mostramos la imagen si existe. NUNCA mostramos el emoji de pintor 🎨 -->
           <ng-container *ngIf="config().presetKey === 'custom'">
@@ -101,47 +101,42 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
   styles: [`
     .celebration-wrapper {
       position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: max-content;
-      max-width: 85vw;
-      z-index: 2500;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .position-top { top: 25px; }
-    .position-center { top: 50%; transform: translate(-50%, -50%); }
-    .position-bottom { bottom: 35px; }
-
-    .particles-layer {
-      position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2500;
+    }
+
+    .particles-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       overflow: hidden;
-      z-index: 2490;
     }
 
     .sparkle {
       position: absolute;
       font-size: 1.8em;
       opacity: 0;
-      animation: floatDown 4s ease-in-out infinite;
+      animation: floatDown 4.5s ease-in-out infinite;
     }
 
     @keyframes floatDown {
       0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
       15% { opacity: 0.9; }
       85% { opacity: 0.8; }
-      100% { transform: translateY(60vh) rotate(360deg); opacity: 0; }
+      100% { transform: translateY(65%) rotate(360deg); opacity: 0; }
     }
 
     .celebration-card {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       background: rgba(15, 15, 15, 0.92);
       border: 2px solid #ffd700;
       border-radius: 16px;
@@ -154,8 +149,12 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       align-items: center;
       gap: 2px;
       width: fit-content;
-      max-width: 100%;
+      max-width: 85%;
     }
+
+    .position-top { top: 25px; }
+    .position-center { top: 50%; transform: translate(-50%, -50%); }
+    .position-bottom { bottom: 35px; }
 
     .animate-card {
       animation: popupBanner 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -219,19 +218,20 @@ export class CelebrationOverlayComponent implements OnInit, OnDestroy {
   public activePreset = signal<CelebrationPreset>(CELEBRATION_PRESETS[0]);
 
   public particles = [
-    { left: 5, delay: 0 },
-    { left: 10, delay: 0.5 },
-    { left: 15, delay: 0.7 },
-    { left: 25, delay: 0.3 },
-    { left: 30, delay: 0.3 },
-    { left: 35, delay: 1.5 },
-    { left: 45, delay: 0.2 },
-    { left: 55, delay: 1.1 },
-    { left: 60, delay: 1.4 },
-    { left: 65, delay: 0.5 },
-    { left: 75, delay: 1.8 },
-    { left: 85, delay: 0.9 },
-    { left: 95, delay: 1.4 }
+    { left: 3, delay: 0 },
+    { left: 10, delay: 0.8 },
+    { left: 17, delay: 0.3 },
+    { left: 24, delay: 1.5 },
+    { left: 31, delay: 0.2 },
+    { left: 38, delay: 1.1 },
+    { left: 45, delay: 0.6 },
+    { left: 52, delay: 1.8 },
+    { left: 59, delay: 0.4 },
+    { left: 66, delay: 1.3 },
+    { left: 73, delay: 0.9 },
+    { left: 80, delay: 1.6 },
+    { left: 87, delay: 0.1 },
+    { left: 94, delay: 1.0 }
   ];
 
   private timerId: any = null;
