@@ -35,7 +35,15 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
 
         <!-- Stars / Father / Custom -->
         <ng-container *ngSwitchCase="'stars'">
-          <div *ngFor="let p of particles" class="sparkle star" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">⭐</div>
+          <!-- Si es personalizada y hay una imagen cargada, caen copias de la imagen. Si no, caen estrellas ⭐ -->
+          <ng-container *ngIf="config().presetKey === 'custom' && config().customImageUrl; else regularStars">
+            <div *ngFor="let p of particles" class="sparkle custom-particle" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">
+              <img [src]="config().customImageUrl" alt="Particle">
+            </div>
+          </ng-container>
+          <ng-template #regularStars>
+            <div *ngFor="let p of particles" class="sparkle star" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">⭐</div>
+          </ng-template>
         </ng-container>
 
         <!-- Roses / Mother -->
@@ -184,6 +192,13 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       object-fit: contain;
       filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
       margin-bottom: 5px;
+    }
+
+    .custom-particle img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.4));
     }
 
     @media (max-width: 768px), (orientation: portrait) {
