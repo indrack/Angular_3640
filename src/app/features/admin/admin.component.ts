@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { getDatabase, ref, set, get, Database } from 'firebase/database';
 import { FIREBASE_CONFIG } from '../../core/config/firebase.config';
 import { WodItem, DayWods, DayName } from '../../core/models/wod.model';
 import { WODS_DATA } from '../../core/data/wods.data';
+import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, CelebrationPresetKey } from '../../core/models/celebration.model';
 
 @Component({
   selector: 'app-admin',
@@ -35,8 +36,8 @@ import { WODS_DATA } from '../../core/data/wods.data';
             </svg>
           </span>
         </div>
-        <button class="btn-action" [disabled]="isSubmitting()" (click)="login()">
-          {{ isSubmitting() ? 'Entrando...' : 'Iniciar Sesión' }}
+        <button class="btn-action" [disabled]="isSubmitting() || lockoutSeconds() > 0" (click)="login()">
+          {{ lockoutSeconds() > 0 ? 'Bloqueado (' + lockoutSeconds() + 's)' : (isSubmitting() ? 'Entrando...' : 'Iniciar Sesión') }}
         </button>
         <div *ngIf="loginError()" class="error-msg">{{ loginError() }}</div>
         <button class="btn-action btn-secondary" (click)="goToTv()">Ver Pantalla WOD</button>
@@ -49,8 +50,10 @@ import { WODS_DATA } from '../../core/data/wods.data';
 
       <!-- STEP 1: LOCATION SELECTION -->
       <div *ngIf="step() === 'location'" class="admin-container">
-        <h2 style="color:#fff; margin-bottom:10px;">SELECCIONA SEDE</h2>
-        <p style="color:#666; margin-bottom:30px;">¿Qué pantalla quieres controlar?</p>
+        <h2 style="color:#fff; margin-bottom:5px;">SELECCIONA SEDE</h2>
+        <p style="color:#888; font-size:0.85em; margin-bottom:25px;">
+          Sesión activa: <b style="color:#00e5ff;">{{ currentUserEmail() }}</b>
+        </p>
 
         <div class="selection-card" (click)="selectLocation('calacoto')">
           <h3>CALACOTO (TV 8)</h3>
@@ -62,12 +65,19 @@ import { WODS_DATA } from '../../core/data/wods.data';
           <p>Control Remoto Botón 7</p>
         </div>
 
-        <div class="selection-card weekly-card" (click)="openWeeklyManager()">
+        <div *ngIf="isSuperAdmin()" class="selection-card weekly-card" (click)="openWeeklyManager()">
           <h3 style="color:#00e5ff;">📅 WODS DE LA SEMANA</h3>
           <p>Ver rutina actual por días, editar o importar .TXT semanal</p>
         </div>
 
-        <button class="btn-action btn-secondary" (click)="logout()">Cerrar Sesión</button>
+        <div *ngIf="isCelebrationAdmin()" class="selection-card celebration-card" (click)="openCelebrationManager()">
+          <h3 style="color:#ffd700;">🎉 CELEBRACIONES Y FESTIVIDADES</h3>
+          <p>Aniversario, Navidad, San Valentín, Festividades y PNG Personalizado</p>
+        </div>
+
+        <button class="btn-action" style="margin-top:20px; background:#cc3333;" (click)="logout()">
+          🚪 Cerrar Sesión
+        </button>
         <button class="btn-action btn-secondary" (click)="goToTv()">Ver Pantalla WOD</button>
       </div>
 
@@ -238,6 +248,106 @@ import { WODS_DATA } from '../../core/data/wods.data';
 
         <button class="btn-action btn-secondary" (click)="copyWeeklyTsCode()">
           📋 Copiar Código TypeScript (wods.data.ts)
+        </button>
+
+        <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
+          {{ statusMsg() }}
+        </div>
+
+        <button class="btn-action btn-secondary" (click)="step.set('location')">
+          ⬅️ Volver a Selección de Sede
+        </button>
+      </div>
+
+      <!-- STEP 7: CELEBRATIONS & HOLIDAYS MANAGER -->
+      <div *ngIf="step() === 'celebration'" class="admin-container editor-container">
+        <h2 style="color:#ffd700; margin-bottom:10px;">🎉 GESTOR DE CELEBRACIONES Y OVERLAYS</h2>
+        <p style="color:#aaa; font-size:0.9em; margin-bottom:20px;">
+          Configura banners animados festivos para mostrar en todas las TVs del Box (Exclusivo para asvins25).
+        </p>
+
+        <!-- ENABLE / DISABLE TOGGLE -->
+        <div class="input-group" style="background:rgba(255,215,0,0.1); padding:15px; border-radius:8px; border:1px solid #ffd700;">
+          <label style="display:flex; align-items:center; gap:12px; font-weight:bold; cursor:pointer; font-size:1.1em; color:#fff;">
+            <input type="checkbox" [(ngModel)]="celebrationForm.enabled" style="width:22px; height:22px;">
+            <span>{{ celebrationForm.enabled ? '🟢 Celebración ACTIVADA en Pantalla' : '🔴 Celebración DESACTIVADA' }}</span>
+          </label>
+        </div>
+
+        <!-- PRESETS GRID -->
+        <div class="input-group" style="margin-top:20px;">
+          <label style="font-weight:bold; color:#fff; display:block; margin-bottom:10px;">Elige una Festividad o Preset:</label>
+          <div class="presets-grid">
+            <div *ngFor="let p of celebrationPresets" 
+                 class="preset-item" 
+                 [class.active]="celebrationForm.presetKey === p.key"
+                 (click)="selectCelebrationPreset(p.key)">
+              <span class="preset-icon-sm">{{ p.icon }}</span>
+              <span class="preset-name">{{ p.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CUSTOM TITLE AND SUBTITLE EDITORS -->
+        <div class="input-group" style="margin-top:15px;">
+          <label style="color:#aaa;">Título en Pantalla:</label>
+          <input type="text" [(ngModel)]="celebrationForm.title" class="count-input" style="width:100%; font-size:1.1em; padding:10px; margin-top:5px;" placeholder="Título festivo...">
+        </div>
+
+        <div class="input-group">
+          <label style="color:#aaa;">Subtítulo o Mensaje Especial:</label>
+          <input type="text" [(ngModel)]="celebrationForm.subtitle" class="count-input" style="width:100%; font-size:1.1em; padding:10px; margin-top:5px;" placeholder="Mensaje para los atletas...">
+        </div>
+
+        <!-- CUSTOM PNG FILE UPLOAD (IF PRESET IS CUSTOM) -->
+        <div *ngIf="celebrationForm.presetKey === 'custom'" class="input-group" style="background:rgba(0,229,255,0.08); padding:15px; border-radius:8px; border:1px solid #00e5ff;">
+          <label style="font-weight:bold; color:#00e5ff; display:block; margin-bottom:8px;">Subir Imagen PNG Personalizada (Fondo Transparente):</label>
+          <input type="file" (change)="onCustomPngUpload($event)" accept="image/png,image/webp,image/jpeg" style="margin-bottom:10px;">
+          <div *ngIf="celebrationForm.customImageUrl" style="margin-top:10px; text-align:center;">
+            <p style="color:#aaa; font-size:0.8em; margin-bottom:5px;">Vista previa de imagen cargada:</p>
+            <img [src]="celebrationForm.customImageUrl" style="max-height:120px; object-fit:contain;" alt="Preview">
+            <br>
+            <button class="btn-remove-compact" style="margin-top:5px;" (click)="celebrationForm.customImageUrl = ''">✕ Quitar Imagen</button>
+          </div>
+        </div>
+
+        <!-- TIMING CONTROLS -->
+        <div class="input-group" style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:15px; text-align:left;">
+          <div>
+            <label style="color:#aaa; display:block; margin-bottom:5px;">Frecuencia de Aparición:</label>
+            <select [(ngModel)]="celebrationForm.intervalSeconds" class="count-input" style="width:100%; padding:10px; background:#222; color:#fff;">
+              <option [ngValue]="60">Cada 1 minuto</option>
+              <option [ngValue]="180">Cada 3 minutos</option>
+              <option [ngValue]="300">Cada 5 minutos (Recomendado)</option>
+              <option [ngValue]="600">Cada 10 minutos</option>
+              <option [ngValue]="900">Cada 15 minutos</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="color:#aaa; display:block; margin-bottom:5px;">Duración en Pantalla:</label>
+            <select [(ngModel)]="celebrationForm.durationSeconds" class="count-input" style="width:100%; padding:10px; background:#222; color:#fff;">
+              <option [ngValue]="5">5 segundos</option>
+              <option [ngValue]="8">8 segundos (Recomendado)</option>
+              <option [ngValue]="10">10 segundos</option>
+              <option [ngValue]="15">15 segundos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- POSITION SELECTOR -->
+        <div class="input-group" style="text-align:left;">
+          <label style="color:#aaa; display:block; margin-bottom:5px;">Posición en Pantalla:</label>
+          <select [(ngModel)]="celebrationForm.position" class="count-input" style="width:100%; padding:10px; background:#222; color:#fff;">
+            <option value="top">Superior Centro (Recomendado)</option>
+            <option value="center">Centro Flotante</option>
+            <option value="bottom">Inferior Centro</option>
+          </select>
+        </div>
+
+        <!-- SAVE BUTTON -->
+        <button class="btn-action" style="background:#ffd700; color:#000; font-weight:bold; margin-top:20px;" [disabled]="isPublishing()" (click)="saveCelebrationToFirebase()">
+          ☁️ {{ isPublishing() ? 'GUARDANDO...' : 'GUARDAR Y ACTIVAR CELEBRACIÓN EN TODAS LAS TVs' }}
         </button>
 
         <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
@@ -591,12 +701,65 @@ import { WODS_DATA } from '../../core/data/wods.data';
       padding: 0 5px;
     }
     .btn-remove-compact:hover { color: #ff4444; }
+
+    .celebration-card {
+      border-color: #ffd700 !important;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .preset-item {
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .preset-item:hover {
+      border-color: #ffd700;
+      transform: translateY(-2px);
+    }
+
+    .preset-item.active {
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.18);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+
+    .preset-icon-sm {
+      font-size: 1.8em;
+    }
+
+    .preset-name {
+      font-size: 0.78em;
+      color: #ddd;
+    }
   `]
 })
 export class AdminComponent implements OnInit {
-  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor' | 'weekly'>('loading');
+  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor' | 'weekly' | 'celebration'>('loading');
   public selectedLocation = signal<'miraflores' | 'calacoto'>('miraflores');
   public selectedMode = signal<'new' | 'append'>('append');
+
+  public currentUserEmail = signal<string>('');
+  public isSuperAdmin = computed<boolean>(() => {
+    const email = this.currentUserEmail().toLowerCase();
+    return email === 'admincross@gmail.com' || email === 'asvins25@gmail.com';
+  });
+  public isCelebrationAdmin = computed<boolean>(() => this.currentUserEmail().toLowerCase() === 'asvins25@gmail.com');
 
   public email = '';
   public password = '';
@@ -641,9 +804,11 @@ export class AdminComponent implements OnInit {
   ngOnInit(): void {
     if (this.auth) {
       onAuthStateChanged(this.auth, (user: User | null) => {
-        if (user) {
+        if (user && user.email) {
+          this.currentUserEmail.set(user.email);
           this.step.set('location');
         } else {
+          this.currentUserEmail.set('');
           this.step.set('login');
         }
       });
@@ -656,33 +821,106 @@ export class AdminComponent implements OnInit {
     this.showPassword.update(v => !v);
   }
 
+  private getFriendlyErrorMessage(errorCode: string): string {
+    switch (errorCode) {
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+      case 'auth/invalid-email':
+        return 'Correo o contraseña incorrectos. Por favor verifica tus credenciales.';
+      case 'auth/too-many-requests':
+        return 'Demasiados intentos fallidos. Por favor intenta más tarde por seguridad.';
+      case 'auth/network-request-failed':
+        return 'Error de conexión a internet. Verifica tu red.';
+      case 'auth/user-disabled':
+        return 'Esta cuenta ha sido deshabilitada. Contacta al administrador.';
+      default:
+        return 'No se pudo iniciar sesión. Por favor verifica tus datos e intenta de nuevo.';
+    }
+  }
+
+  public remainingAttempts = signal<number>(5);
+  public lockoutSeconds = signal<number>(0);
+  private lockoutTimer: any = null;
+
   public login(): void {
     if (!this.auth) return;
+    if (this.lockoutSeconds() > 0) {
+      this.loginError.set(`Acceso bloqueado por seguridad. Espera ${this.lockoutSeconds()} segundos.`);
+      return;
+    }
+
     this.loginError.set('');
     this.isSubmitting.set(true);
 
     setPersistence(this.auth, browserSessionPersistence)
       .then(() => signInWithEmailAndPassword(this.auth!, this.email, this.password))
-      .then(() => {
+      .then((userCredential) => {
         this.isSubmitting.set(false);
+        this.remainingAttempts.set(5);
+        this.lockoutSeconds.set(0);
+        if (this.lockoutTimer) clearInterval(this.lockoutTimer);
+        if (userCredential.user && userCredential.user.email) {
+          this.currentUserEmail.set(userCredential.user.email);
+        }
       })
       .catch((error) => {
         this.isSubmitting.set(false);
-        if (error.code === 'auth/wrong-password') {
-          this.loginError.set('Error: Contraseña incorrecta');
-        } else if (error.code === 'auth/user-not-found') {
-          this.loginError.set('Error: Usuario no encontrado');
-        } else if (error.code === 'auth/invalid-email') {
-          this.loginError.set('Error: Formato de email inválido');
-        } else {
-          this.loginError.set(`Error: ${error.message}`);
-        }
+        this.handleFailedAttempt(error.code || '');
       });
   }
 
+  private handleFailedAttempt(errorCode: string): void {
+    if (errorCode === 'auth/network-request-failed') {
+      this.loginError.set('Error de conexión a internet. Verifica tu red.');
+      return;
+    }
+
+    const current = this.remainingAttempts() - 1;
+    this.remainingAttempts.set(current);
+
+    if (current > 0) {
+      const plural = current === 1 ? 'intento' : 'intentos';
+      this.loginError.set(`Correo o contraseña incorrectos. Te ${current === 1 ? 'queda' : 'quedan'} ${current} ${plural}.`);
+    } else {
+      this.startLockoutTimer(60);
+    }
+  }
+
+  private startLockoutTimer(seconds: number): void {
+    this.lockoutSeconds.set(seconds);
+    this.loginError.set(`Demasiados intentos fallidos. Botón bloqueado por ${seconds} segundos por seguridad.`);
+
+    if (this.lockoutTimer) clearInterval(this.lockoutTimer);
+    this.lockoutTimer = setInterval(() => {
+      const remaining = this.lockoutSeconds() - 1;
+      if (remaining <= 0) {
+        clearInterval(this.lockoutTimer);
+        this.lockoutSeconds.set(0);
+        this.remainingAttempts.set(5);
+        this.loginError.set('Ya puedes intentar iniciar sesión nuevamente.');
+      } else {
+        this.lockoutSeconds.set(remaining);
+        this.loginError.set(`Demasiados intentos fallidos. Botón bloqueado por ${remaining} segundos por seguridad.`);
+      }
+    }, 1000);
+  }
+
   public logout(): void {
-    if (this.auth) signOut(this.auth);
-    this.step.set('login');
+    if (this.auth) {
+      signOut(this.auth).then(() => {
+        this.currentUserEmail.set('');
+        this.email = '';
+        this.password = '';
+        this.loginError.set('');
+        this.step.set('login');
+      }).catch(() => {
+        this.currentUserEmail.set('');
+        this.step.set('login');
+      });
+    } else {
+      this.step.set('login');
+    }
   }
 
   public selectLocation(loc: 'miraflores' | 'calacoto'): void {
@@ -855,6 +1093,10 @@ export class AdminComponent implements OnInit {
   }
 
   public openWeeklyManager(): void {
+    if (!this.isSuperAdmin()) {
+      alert('Acceso restringido: Esta opción solo está disponible para Administradores de Rutinas Semanales.');
+      return;
+    }
     this.statusMsg.set('');
     if (this.db) {
       get(ref(this.db, 'weeklyWods')).then(snapshot => {
@@ -1027,6 +1269,73 @@ export class AdminComponent implements OnInit {
     }).catch(err => {
       alert('Error copiando: ' + err);
     });
+  }
+
+  public celebrationPresets = CELEBRATION_PRESETS;
+  public celebrationForm: CelebrationConfig = JSON.parse(JSON.stringify(DEFAULT_CELEBRATION_CONFIG));
+
+  public openCelebrationManager(): void {
+    if (!this.isCelebrationAdmin()) {
+      alert('Acceso restringido: El módulo de celebraciones es exclusivo para el usuario asvins25@gmail.com');
+      return;
+    }
+    this.statusMsg.set('');
+    if (this.db) {
+      get(ref(this.db, 'celebrationConfig')).then(snapshot => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.celebrationForm = val;
+        }
+        this.step.set('celebration');
+      }).catch(() => {
+        this.step.set('celebration');
+      });
+    } else {
+      this.step.set('celebration');
+    }
+  }
+
+  public selectCelebrationPreset(key: CelebrationPresetKey): void {
+    this.celebrationForm.presetKey = key;
+    const preset = CELEBRATION_PRESETS.find(p => p.key === key);
+    if (preset) {
+      this.celebrationForm.title = preset.title;
+      this.celebrationForm.subtitle = preset.subtitle;
+    }
+  }
+
+  public onCustomPngUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.celebrationForm.customImageUrl = e.target?.result as string || '';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  public saveCelebrationToFirebase(): void {
+    if (!this.isCelebrationAdmin()) {
+      alert('Acceso restringido: No tienes permisos para guardar la configuración de celebraciones.');
+      return;
+    }
+    if (!this.db) return;
+    this.isPublishing.set(true);
+    this.statusMsg.set('Guardando configuración de celebración en Firebase...');
+
+    set(ref(this.db, 'celebrationConfig'), this.celebrationForm)
+      .then(() => {
+        this.isPublishing.set(false);
+        this.statusMsg.set('¡CONFIGURACIÓN DE CELEBRACIÓN PUBLICADA EN TODAS LAS TVs CON ÉXITO!');
+        this.statusColor.set('#00ff00');
+      })
+      .catch(err => {
+        this.isPublishing.set(false);
+        this.statusMsg.set(`Error: ${err.message}`);
+        this.statusColor.set('orange');
+      });
   }
 
   public goToTv(): void {

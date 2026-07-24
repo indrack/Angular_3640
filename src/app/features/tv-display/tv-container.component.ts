@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HeaderClockComponent } from './header-clock.component';
 import { WodSlideComponent } from './wod-slide.component';
 import { FullViewModalComponent } from './full-view-modal.component';
-import { AnniversaryOverlayComponent } from './anniversary-overlay.component';
+import { CelebrationOverlayComponent } from './celebration-overlay.component';
 import { WodService } from '../../core/services/wod.service';
 import { RemoteControlService } from '../../core/services/remote-control.service';
 
@@ -15,7 +15,7 @@ import { RemoteControlService } from '../../core/services/remote-control.service
     HeaderClockComponent,
     WodSlideComponent,
     FullViewModalComponent,
-    AnniversaryOverlayComponent
+    CelebrationOverlayComponent
   ],
   template: `
     <div class="tv-container">
@@ -38,7 +38,7 @@ import { RemoteControlService } from '../../core/services/remote-control.service
 
       <app-full-view-modal></app-full-view-modal>
 
-      <app-anniversary-overlay></app-anniversary-overlay>
+      <app-celebration-overlay></app-celebration-overlay>
     </div>
   `,
   styles: [`

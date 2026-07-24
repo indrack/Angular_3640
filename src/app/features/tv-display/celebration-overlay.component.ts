@@ -1,0 +1,272 @@
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { initializeApp, getApps } from 'firebase/app';
+import { getDatabase, ref, onValue, Database } from 'firebase/database';
+import { FIREBASE_CONFIG } from '../../core/config/firebase.config';
+import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, CelebrationPreset } from '../../core/models/celebration.model';
+
+@Component({
+  selector: 'app-celebration-overlay',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div *ngIf="config().enabled && isVisible()" [class]="'celebration-wrapper position-' + config().position">
+      <!-- Particle Effect Background Layer -->
+      <div class="particles-layer" [ngSwitch]="activePreset().particleType">
+        <!-- Gold Sparks / Anniversary -->
+        <ng-container *ngSwitchCase="'gold_sparks'">
+          <div *ngFor="let p of particles" class="sparkle gold" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">✨</div>
+        </ng-container>
+
+        <!-- Hearts / Valentine -->
+        <ng-container *ngSwitchCase="'hearts'">
+          <div *ngFor="let p of particles" class="sparkle heart" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">❤️</div>
+        </ng-container>
+
+        <!-- Confetti / Carnival -->
+        <ng-container *ngSwitchCase="'confetti'">
+          <div *ngFor="let p of particles" class="sparkle confetti-item" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">🎉</div>
+        </ng-container>
+
+        <!-- Snow / Christmas -->
+        <ng-container *ngSwitchCase="'snow'">
+          <div *ngFor="let p of particles" class="sparkle snowflake" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">❄️</div>
+        </ng-container>
+
+        <!-- Stars / Father / Custom -->
+        <ng-container *ngSwitchCase="'stars'">
+          <div *ngFor="let p of particles" class="sparkle star" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">⭐</div>
+        </ng-container>
+
+        <!-- Roses / Mother -->
+        <ng-container *ngSwitchCase="'roses'">
+          <div *ngFor="let p of particles" class="sparkle rose" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">🌹</div>
+        </ng-container>
+
+        <!-- Purple Sparks / Women's Day -->
+        <ng-container *ngSwitchCase="'purple_sparks'">
+          <div *ngFor="let p of particles" class="sparkle purple" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">💜</div>
+        </ng-container>
+
+        <!-- Bronze / Men's Day -->
+        <ng-container *ngSwitchCase="'bronze_shield'">
+          <div *ngFor="let p of particles" class="sparkle bronze" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">⚡</div>
+        </ng-container>
+
+        <!-- Gold Light / Easter -->
+        <ng-container *ngSwitchCase="'gold_light'">
+          <div *ngFor="let p of particles" class="sparkle gold" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">🌟</div>
+        </ng-container>
+
+        <!-- Pumpkins / Halloween -->
+        <ng-container *ngSwitchCase="'pumpkins'">
+          <div *ngFor="let p of particles" class="sparkle pumpkin" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">🎃</div>
+        </ng-container>
+
+        <!-- Flames / CrossFit Open -->
+        <ng-container *ngSwitchCase="'flames'">
+          <div *ngFor="let p of particles" class="sparkle flame" [style.left.%]="p.left" [style.animationDelay.s]="p.delay">🔥</div>
+        </ng-container>
+      </div>
+
+      <!-- Glassmorphic Banner Card -->
+      <div class="celebration-card animate-card" [style.borderColor]="activePreset().badgeColor">
+        <div class="icon-header">
+          <span class="preset-icon">{{ activePreset().icon }}</span>
+        </div>
+
+        <div class="card-body">
+          <h2 [style.color]="activePreset().badgeColor">{{ config().title || activePreset().title }}</h2>
+          <p *ngIf="config().subtitle || activePreset().subtitle">{{ config().subtitle || activePreset().subtitle }}</p>
+        </div>
+
+        <!-- Custom Image (if custom PNG upload) -->
+        <div *ngIf="config().presetKey === 'custom' && config().customImageUrl" class="custom-img-box">
+          <img [src]="config().customImageUrl" class="custom-png" alt="Celebración Personalizada">
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .celebration-wrapper {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 550px;
+      z-index: 2500;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .position-top { top: 25px; }
+    .position-center { top: 50%; transform: translate(-50%, -50%); }
+    .position-bottom { bottom: 35px; }
+
+    .particles-layer {
+      position: absolute;
+      top: -100px;
+      left: -20%;
+      width: 140%;
+      height: 400px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sparkle {
+      position: absolute;
+      font-size: 1.8em;
+      opacity: 0;
+      animation: floatDown 4s ease-in-out infinite;
+    }
+
+    @keyframes floatDown {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.9; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(350px) rotate(360deg); opacity: 0; }
+    }
+
+    .celebration-card {
+      background: rgba(15, 15, 15, 0.92);
+      border: 2px solid #ffd700;
+      border-radius: 16px;
+      padding: 15px 25px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.3);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .animate-card {
+      animation: popupBanner 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popupBanner {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .preset-icon {
+      font-size: 2.8em;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+    }
+
+    .card-body h2 {
+      font-size: 1.8em;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .card-body p {
+      font-size: 1.1em;
+      color: #ddd;
+      margin: 4px 0 0 0;
+      font-weight: 500;
+    }
+
+    .custom-img-box {
+      margin-top: 10px;
+      max-width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .custom-png {
+      max-width: 250px;
+      max-height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    }
+
+    @media (max-width: 768px), (orientation: portrait) {
+      .celebration-wrapper {
+        width: 95% !important;
+      }
+      .preset-icon { font-size: 2.2em !important; }
+      .card-body h2 { font-size: 1.3em !important; }
+      .card-body p { font-size: 0.95em !important; }
+    }
+  `]
+})
+export class CelebrationOverlayComponent implements OnInit, OnDestroy {
+  public config = signal<CelebrationConfig>(DEFAULT_CELEBRATION_CONFIG);
+  public isVisible = signal<boolean>(false);
+  public activePreset = signal<CelebrationPreset>(CELEBRATION_PRESETS[0]);
+
+  public particles = [
+    { left: 10, delay: 0 },
+    { left: 25, delay: 0.5 },
+    { left: 40, delay: 1.2 },
+    { left: 60, delay: 0.3 },
+    { left: 75, delay: 0.9 },
+    { left: 90, delay: 1.5 }
+  ];
+
+  private timerId: any = null;
+  private hideTimerId: any = null;
+  private db: Database | null = null;
+
+  ngOnInit(): void {
+    let app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    this.db = getDatabase(app);
+
+    if (this.db) {
+      onValue(ref(this.db, 'celebrationConfig'), (snapshot) => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.applyConfig(val as CelebrationConfig);
+        } else {
+          this.applyConfig(DEFAULT_CELEBRATION_CONFIG);
+        }
+      });
+    } else {
+      this.applyConfig(DEFAULT_CELEBRATION_CONFIG);
+    }
+  }
+
+  private applyConfig(newConfig: CelebrationConfig): void {
+    this.config.set(newConfig);
+
+    const foundPreset = CELEBRATION_PRESETS.find(p => p.key === newConfig.presetKey) || CELEBRATION_PRESETS[0];
+    this.activePreset.set(foundPreset);
+
+    this.stopTimers();
+
+    if (newConfig.enabled) {
+      const intervalMs = Math.max((newConfig.intervalSeconds || 300) * 1000, 5000);
+      this.triggerShow(newConfig.durationSeconds || 8);
+      this.timerId = setInterval(() => {
+        this.triggerShow(newConfig.durationSeconds || 8);
+      }, intervalMs);
+    } else {
+      this.isVisible.set(false);
+    }
+  }
+
+  private triggerShow(durationSec: number): void {
+    this.isVisible.set(true);
+    if (this.hideTimerId) clearTimeout(this.hideTimerId);
+    this.hideTimerId = setTimeout(() => {
+      this.isVisible.set(false);
+    }, durationSec * 1000);
+  }
+
+  private stopTimers(): void {
+    if (this.timerId) clearInterval(this.timerId);
+    if (this.hideTimerId) clearTimeout(this.hideTimerId);
+  }
+
+  ngOnDestroy(): void {
+    this.stopTimers();
+  }
+}
