@@ -176,10 +176,11 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     }
 
     .custom-icon-png {
-      max-height: 80px;
-      max-width: 140px;
+      height: 55px;
+      width: auto;
+      max-width: 120px;
       object-fit: contain;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
       margin-bottom: 5px;
     }
 
