@@ -130,7 +130,7 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
       20% { opacity: 0.95; }
       75% { opacity: 0.8; }
-      100% { transform: translateY(26%) rotate(180deg); opacity: 0; }
+      100% { transform: translateY(52%) rotate(180deg); opacity: 0; }
     }
 
     .celebration-card {
@@ -157,12 +157,21 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     .position-bottom { bottom: 35px; }
 
     .animate-card {
-      animation: popupBanner 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: popupBanner 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+    }
+
+    .position-center.animate-card {
+      animation: popupBannerCenter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
     }
 
     @keyframes popupBanner {
-      0% { transform: scale(0.6); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes popupBannerCenter {
+      0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
 
     .preset-icon {
@@ -276,8 +285,10 @@ export class CelebrationOverlayComponent implements OnInit, OnDestroy {
   }
 
   private triggerShow(durationSec: number): void {
-    this.isVisible.set(true);
     if (this.hideTimerId) clearTimeout(this.hideTimerId);
+    requestAnimationFrame(() => {
+      this.isVisible.set(true);
+    });
     this.hideTimerId = setTimeout(() => {
       this.isVisible.set(false);
     }, durationSec * 1000);
