@@ -117,13 +117,14 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     .position-bottom { bottom: 35px; }
 
     .particles-layer {
-      position: absolute;
-      top: -100px;
-      left: -20%;
-      width: 140%;
-      height: 400px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
       overflow: hidden;
+      z-index: 2490;
     }
 
     .sparkle {
@@ -134,10 +135,10 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     }
 
     @keyframes floatDown {
-      0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
-      20% { opacity: 0.9; }
-      80% { opacity: 0.8; }
-      100% { transform: translateY(350px) rotate(360deg); opacity: 0; }
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+      15% { opacity: 0.9; }
+      85% { opacity: 0.8; }
+      100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
     }
 
     .celebration-card {
@@ -218,12 +219,16 @@ export class CelebrationOverlayComponent implements OnInit, OnDestroy {
   public activePreset = signal<CelebrationPreset>(CELEBRATION_PRESETS[0]);
 
   public particles = [
-    { left: 10, delay: 0 },
-    { left: 25, delay: 0.5 },
-    { left: 40, delay: 1.2 },
-    { left: 60, delay: 0.3 },
-    { left: 75, delay: 0.9 },
-    { left: 90, delay: 1.5 }
+    { left: 5, delay: 0 },
+    { left: 15, delay: 0.7 },
+    { left: 25, delay: 0.3 },
+    { left: 35, delay: 1.5 },
+    { left: 45, delay: 0.2 },
+    { left: 55, delay: 1.1 },
+    { left: 65, delay: 0.5 },
+    { left: 75, delay: 1.8 },
+    { left: 85, delay: 0.9 },
+    { left: 95, delay: 1.4 }
   ];
 
   private timerId: any = null;
