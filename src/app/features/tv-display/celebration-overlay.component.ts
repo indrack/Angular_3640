@@ -130,7 +130,7 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
       15% { opacity: 0.9; }
       85% { opacity: 0.8; }
-      100% { transform: translateY(65%) rotate(360deg); opacity: 0; }
+      100% { transform: translateY(105%) rotate(360deg); opacity: 0; }
     }
 
     .celebration-card {
