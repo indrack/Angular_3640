@@ -434,12 +434,12 @@ import { WeeklyWodService } from '../../core/services/weekly-wod.service';
 
               <!-- Simulación de Banner de Celebración si está activo -->
               <div *ngIf="celebrationService.config().enabled" class="sim-celebration-banner">
-                <ng-container *ngIf="celebrationService.config().presetKey === 'custom' && celebrationService.config().customImageUrl; else regularSimIcon">
-                  <img [src]="celebrationService.config().customImageUrl" class="sim-custom-icon" alt="Icon">
+                <ng-container *ngIf="celebrationService.config().presetKey === 'custom'">
+                  <img *ngIf="celebrationService.config().customImageUrl" [src]="celebrationService.config().customImageUrl" class="sim-custom-icon" alt="Icon">
                 </ng-container>
-                <ng-template #regularSimIcon>
+                <ng-container *ngIf="celebrationService.config().presetKey !== 'custom'">
                   <span style="font-size:1.6em;">{{ getCelebrationIcon() }}</span>
-                </ng-template>
+                </ng-container>
                 <div>
                   <strong style="color:#ffd700; display:block;">{{ celebrationService.config().title }}</strong>
                   <span style="color:#ddd; font-size:0.85em;">{{ celebrationService.config().subtitle }}</span>
@@ -972,9 +972,9 @@ import { WeeklyWodService } from '../../core/services/weekly-wod.service';
     }
 
     .sim-custom-icon {
-      height: 32px;
+      height: 24px;
       width: auto;
-      max-width: 60px;
+      max-width: 50px;
       object-fit: contain;
       filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
     }

@@ -72,13 +72,15 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       <!-- Glassmorphic Banner Card -->
       <div class="celebration-card animate-card" [style.borderColor]="activePreset().badgeColor">
         <div class="icon-header">
-          <!-- Si es personalizada y hay una imagen cargada, reemplazamos el emoji con la imagen -->
-          <ng-container *ngIf="config().presetKey === 'custom' && config().customImageUrl; else regularIcon">
-            <img [src]="config().customImageUrl" class="custom-icon-png" alt="Icono de Celebración">
+          <!-- Si es personalizada, mostramos la imagen si existe. NUNCA mostramos el emoji de pintor 🎨 -->
+          <ng-container *ngIf="config().presetKey === 'custom'">
+            <img *ngIf="config().customImageUrl" [src]="config().customImageUrl" class="custom-icon-png" alt="Icono de Celebración">
           </ng-container>
-          <ng-template #regularIcon>
+          
+          <!-- Si NO es personalizada, mostramos el emoji regular -->
+          <ng-container *ngIf="config().presetKey !== 'custom'">
             <span class="preset-icon">{{ activePreset().icon }}</span>
-          </ng-template>
+          </ng-container>
         </div>
 
         <div class="card-body">
@@ -176,11 +178,11 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     }
 
     .custom-icon-png {
-      height: 55px;
+      height: 45px;
       width: auto;
-      max-width: 120px;
+      max-width: 100px;
       object-fit: contain;
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
       margin-bottom: 5px;
     }
 
