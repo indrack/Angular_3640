@@ -103,8 +103,8 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
-      max-width: 550px;
+      width: max-content;
+      max-width: 85vw;
       z-index: 2500;
       pointer-events: none;
       display: flex;
@@ -144,15 +144,16 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       background: rgba(15, 15, 15, 0.92);
       border: 2px solid #ffd700;
       border-radius: 16px;
-      padding: 15px 25px;
+      padding: 12px 20px;
       text-align: center;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.3);
       backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      width: 100%;
+      gap: 2px;
+      width: fit-content;
+      max-width: 100%;
     }
 
     .animate-card {
@@ -181,17 +182,17 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     .card-body p {
       font-size: 1.1em;
       color: #ddd;
-      margin: 4px 0 0 0;
+      margin: 2px 0 0 0;
       font-weight: 500;
     }
 
     .custom-icon-png {
-      height: 45px;
+      height: 110px;
       width: auto;
-      max-width: 100px;
+      max-width: 220px;
       object-fit: contain;
-      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-      margin-bottom: 5px;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      margin-bottom: 0px;
     }
 
     .custom-particle img {

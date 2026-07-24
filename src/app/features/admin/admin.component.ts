@@ -963,18 +963,20 @@ import { WeeklyWodService } from '../../core/services/weekly-wod.service';
       background: rgba(20, 20, 20, 0.95);
       border: 1px solid #ffd700;
       border-radius: 8px;
-      padding: 8px 15px;
+      padding: 6px 12px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
+      width: max-content;
+      max-width: 90%;
       box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
       z-index: 10;
     }
 
     .sim-custom-icon {
-      height: 24px;
+      height: 48px;
       width: auto;
-      max-width: 50px;
+      max-width: 100px;
       object-fit: contain;
       filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
     }
