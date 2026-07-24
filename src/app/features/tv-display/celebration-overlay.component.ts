@@ -138,7 +138,7 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
       15% { opacity: 0.9; }
       85% { opacity: 0.8; }
-      100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+      100% { transform: translateY(60vh) rotate(360deg); opacity: 0; }
     }
 
     .celebration-card {
@@ -220,11 +220,14 @@ export class CelebrationOverlayComponent implements OnInit, OnDestroy {
 
   public particles = [
     { left: 5, delay: 0 },
+    { left: 10, delay: 0.5 },
     { left: 15, delay: 0.7 },
     { left: 25, delay: 0.3 },
+    { left: 30, delay: 0.3 },
     { left: 35, delay: 1.5 },
     { left: 45, delay: 0.2 },
     { left: 55, delay: 1.1 },
+    { left: 60, delay: 1.4 },
     { left: 65, delay: 0.5 },
     { left: 75, delay: 1.8 },
     { left: 85, delay: 0.9 },
