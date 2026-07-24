@@ -72,17 +72,18 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       <!-- Glassmorphic Banner Card -->
       <div class="celebration-card animate-card" [style.borderColor]="activePreset().badgeColor">
         <div class="icon-header">
-          <span class="preset-icon">{{ activePreset().icon }}</span>
+          <!-- Si es personalizada y hay una imagen cargada, reemplazamos el emoji con la imagen -->
+          <ng-container *ngIf="config().presetKey === 'custom' && config().customImageUrl; else regularIcon">
+            <img [src]="config().customImageUrl" class="custom-icon-png" alt="Icono de Celebración">
+          </ng-container>
+          <ng-template #regularIcon>
+            <span class="preset-icon">{{ activePreset().icon }}</span>
+          </ng-template>
         </div>
 
         <div class="card-body">
           <h2 [style.color]="activePreset().badgeColor">{{ config().title || activePreset().title }}</h2>
           <p *ngIf="config().subtitle || activePreset().subtitle">{{ config().subtitle || activePreset().subtitle }}</p>
-        </div>
-
-        <!-- Custom Image (if custom PNG upload) -->
-        <div *ngIf="config().presetKey === 'custom' && config().customImageUrl" class="custom-img-box">
-          <img [src]="config().customImageUrl" class="custom-png" alt="Celebración Personalizada">
         </div>
       </div>
     </div>
@@ -174,18 +175,12 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       font-weight: 500;
     }
 
-    .custom-img-box {
-      margin-top: 10px;
-      max-width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-
-    .custom-png {
-      max-width: 250px;
-      max-height: 180px;
+    .custom-icon-png {
+      max-height: 80px;
+      max-width: 140px;
       object-fit: contain;
       filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      margin-bottom: 5px;
     }
 
     @media (max-width: 768px), (orientation: portrait) {
