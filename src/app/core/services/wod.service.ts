@@ -119,32 +119,46 @@ export class WodService {
   public hasPrev = computed<boolean>(() => this.currentSlideIndex() > 0);
   public hasNext = computed<boolean>(() => this.currentSlideIndex() < this.currentWodParts().length - 1);
 
+  public isAnimatingSlide = signal<boolean>(false);
+
+  private triggerSlideAnimation(action: () => void): void {
+    this.isAnimatingSlide.set(true);
+    setTimeout(() => {
+      action();
+      setTimeout(() => {
+        this.isAnimatingSlide.set(false);
+      }, 50);
+    }, 150);
+  }
+
   public toggleMode(targetMode: Exclude<ActiveMode, null>): void {
-    if (this.activeMode() === targetMode) {
-      this.activeMode.set(null);
-    } else {
-      this.activeMode.set(targetMode);
-    }
-    this.currentSlideIndex.set(0);
+    this.triggerSlideAnimation(() => {
+      if (this.activeMode() === targetMode) {
+        this.activeMode.set(null);
+      } else {
+        this.activeMode.set(targetMode);
+      }
+      this.currentSlideIndex.set(0);
+    });
   }
 
   public nextSlide(): void {
     const parts = this.currentWodParts();
     if (this.currentSlideIndex() < parts.length - 1) {
-      this.currentSlideIndex.update(i => i + 1);
+      this.triggerSlideAnimation(() => this.currentSlideIndex.update(i => i + 1));
     }
   }
 
   public prevSlide(): void {
     if (this.currentSlideIndex() > 0) {
-      this.currentSlideIndex.update(i => i - 1);
+      this.triggerSlideAnimation(() => this.currentSlideIndex.update(i => i - 1));
     }
   }
 
   public goToSlide(index: number): void {
     const parts = this.currentWodParts();
-    if (index >= 0 && index < parts.length) {
-      this.currentSlideIndex.set(index);
+    if (index >= 0 && index < parts.length && index !== this.currentSlideIndex()) {
+      this.triggerSlideAnimation(() => this.currentSlideIndex.set(index));
     }
   }
 
@@ -154,6 +168,20 @@ export class WodService {
 
   public formatMarkdownText(text: string): string {
     if (!text) return '';
-    return text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+    let formatted = text;
+
+    // 1. Bold: *text* -> <strong>text</strong>
+    formatted = formatted.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+    // 2. Underline: _text_ -> <u>text</u>
+    formatted = formatted.replace(/_(.*?)_/g, '<u>$1</u>');
+
+    // 3. Highlight weights/loads: (e.g. 60/42.5, 92.5/60, 20/14 lbs, 32/24)
+    formatted = formatted.replace(/(\b\d+(?:\.\d+)?\/\d+(?:\.\d+)?(?:\s*(?:lbs|kg|in))?\b)/gi, '<span class="highlight-weight">$1</span>');
+
+    // 4. Highlight sets/rounds/schemes: (e.g. 21-15-9, 3 SETS, 2 SETS, 2 ROUNDS, AMRAP 12', AMRAP)
+    formatted = formatted.replace(/(\b\d+-\d+-\d+\b|\b\d+\s+(?:SETS|ROUNDS|RFT|AMRAP)\b|\bAMRAP\b)/gi, '<span class="highlight-rounds">$1</span>');
+
+    return formatted;
   }
 }

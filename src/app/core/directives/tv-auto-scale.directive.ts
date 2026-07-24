@@ -1,24 +1,39 @@
-import { Directive, ElementRef, AfterViewChecked, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, AfterViewInit, OnDestroy, HostListener, Input } from '@angular/core';
 
 @Directive({
   selector: '[appTvAutoScale]',
   standalone: true
 })
-export class TvAutoScaleDirective implements AfterViewChecked {
+export class TvAutoScaleDirective implements AfterViewInit, OnDestroy {
   @Input() isRotatedMode: boolean = true;
 
   private lastScrollWidth = 0;
   private lastScrollHeight = 0;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(private el: ElementRef<HTMLElement>) {}
 
-  ngAfterViewChecked(): void {
+  ngAfterViewInit(): void {
     this.adjustScale();
+
+    // Use native ResizeObserver if supported by browser
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.adjustScale();
+      });
+      this.resizeObserver.observe(this.el.nativeElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    setTimeout(() => this.adjustScale(), 100);
+    setTimeout(() => this.adjustScale(), 80);
   }
 
   public adjustScale(): void {
@@ -34,7 +49,6 @@ export class TvAutoScaleDirective implements AfterViewChecked {
     const currentScrollWidth = nativeEl.scrollWidth;
     const currentScrollHeight = nativeEl.scrollHeight;
 
-    // Avoid unneeded recalc loops if dimensions didn't change
     if (this.lastScrollWidth === currentScrollWidth && this.lastScrollHeight === currentScrollHeight) {
       return;
     }
@@ -43,7 +57,6 @@ export class TvAutoScaleDirective implements AfterViewChecked {
     let maxVisualHeight: number;
 
     if (this.isRotatedMode) {
-      // In -90deg rotated mode, width maps to window.innerHeight and height maps to window.innerWidth
       maxVisualWidth = window.innerHeight * 0.94;
       maxVisualHeight = window.innerWidth * 0.90;
     } else {
