@@ -123,14 +123,14 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       position: absolute;
       font-size: 1.8em;
       opacity: 0;
-      animation: floatDown 4.5s ease-in-out infinite;
+      animation: floatDown 1.8s ease-in-out infinite;
     }
 
     @keyframes floatDown {
-      0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
-      15% { opacity: 0.9; }
-      85% { opacity: 0.8; }
-      100% { transform: translateY(105%) rotate(360deg); opacity: 0; }
+      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.95; }
+      75% { opacity: 0.8; }
+      100% { transform: translateY(26%) rotate(180deg); opacity: 0; }
     }
 
     .celebration-card {
@@ -219,19 +219,19 @@ export class CelebrationOverlayComponent implements OnInit, OnDestroy {
 
   public particles = [
     { left: 3, delay: 0 },
-    { left: 10, delay: 0.8 },
-    { left: 17, delay: 0.3 },
-    { left: 24, delay: 1.5 },
+    { left: 10, delay: 0.4 },
+    { left: 17, delay: 0.15 },
+    { left: 24, delay: 0.7 },
     { left: 31, delay: 0.2 },
-    { left: 38, delay: 1.1 },
-    { left: 45, delay: 0.6 },
-    { left: 52, delay: 1.8 },
-    { left: 59, delay: 0.4 },
-    { left: 66, delay: 1.3 },
-    { left: 73, delay: 0.9 },
-    { left: 80, delay: 1.6 },
-    { left: 87, delay: 0.1 },
-    { left: 94, delay: 1.0 }
+    { left: 38, delay: 0.5 },
+    { left: 45, delay: 0.3 },
+    { left: 52, delay: 0.8 },
+    { left: 59, delay: 0.1 },
+    { left: 66, delay: 0.6 },
+    { left: 73, delay: 0.35 },
+    { left: 80, delay: 0.75 },
+    { left: 87, delay: 0.05 },
+    { left: 94, delay: 0.45 }
   ];
 
   private timerId: any = null;
