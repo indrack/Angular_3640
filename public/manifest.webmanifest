@@ -1,0 +1,17 @@
+{
+  "name": "WOD 3640 TV",
+  "short_name": "WOD3640",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

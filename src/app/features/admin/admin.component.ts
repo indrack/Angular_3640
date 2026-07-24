@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,9 @@ import { FIREBASE_CONFIG } from '../../core/config/firebase.config';
 import { WodItem, DayWods, DayName } from '../../core/models/wod.model';
 import { WODS_DATA } from '../../core/data/wods.data';
 import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, CelebrationPresetKey } from '../../core/models/celebration.model';
+import { AuditLogService } from '../../core/services/audit-log.service';
+import { CelebrationService } from '../../core/services/celebration.service';
+import { WeeklyWodService } from '../../core/services/weekly-wod.service';
 
 @Component({
   selector: 'app-admin',
@@ -75,7 +78,16 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
           <p>Aniversario, Navidad, San Valentín, Festividades y PNG Personalizado</p>
         </div>
 
-        <button class="btn-action" style="margin-top:20px; background:#cc3333;" (click)="logout()">
+        <div class="selection-card" style="border-color:#39ff14;" (click)="openAuditLogs()">
+          <h3 style="color:#39ff14;">📜 HISTORIAL DE CAMBIOS</h3>
+          <p>Registro de auditoría de actividad y modificaciones del sistema</p>
+        </div>
+
+        <button class="btn-action" style="margin-top:15px; background:#00e5ff; color:#000; font-weight:bold;" (click)="showLiveSimulator.set(true)">
+          👁️ Probar en Simulador TV en Vivo
+        </button>
+
+        <button class="btn-action" style="margin-top:15px; background:#cc3333;" (click)="logout()">
           🚪 Cerrar Sesión
         </button>
         <button class="btn-action btn-secondary" (click)="goToTv()">Ver Pantalla WOD</button>
@@ -311,27 +323,32 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
           </div>
         </div>
 
-        <!-- TIMING CONTROLS -->
+        <!-- TIMING CONTROLS (CUSTOM FREQUENCY & DURATION) -->
         <div class="input-group" style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:15px; text-align:left;">
           <div>
-            <label style="color:#aaa; display:block; margin-bottom:5px;">Frecuencia de Aparición:</label>
-            <select [(ngModel)]="celebrationForm.intervalSeconds" class="count-input" style="width:100%; padding:10px; background:#222; color:#fff;">
-              <option [ngValue]="60">Cada 1 minuto</option>
-              <option [ngValue]="180">Cada 3 minutos</option>
-              <option [ngValue]="300">Cada 5 minutos (Recomendado)</option>
-              <option [ngValue]="600">Cada 10 minutos</option>
-              <option [ngValue]="900">Cada 15 minutos</option>
-            </select>
+            <label style="color:#ffd700; font-weight:bold; display:block; margin-bottom:5px;">Frecuencia de Aparición (Segundos):</label>
+            <input type="number" [(ngModel)]="celebrationForm.intervalSeconds" min="5" max="7200" class="count-input" style="width:100%; padding:10px; font-size:1em;" placeholder="Ej: 300 (5 min)">
+            <p style="color:#aaa; font-size:0.8em; margin-top:4px;">
+              {{ (celebrationForm.intervalSeconds || 0) >= 60 ? 'Aparece cada ' + ((celebrationForm.intervalSeconds || 0) / 60).toFixed(1) + ' minuto(s)' : 'Aparece cada ' + (celebrationForm.intervalSeconds || 0) + ' segundo(s)' }}
+            </p>
+            <div style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap;">
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.intervalSeconds = 60">1 min</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.intervalSeconds = 180">3 min</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.intervalSeconds = 300">5 min</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.intervalSeconds = 600">10 min</button>
+            </div>
           </div>
 
           <div>
-            <label style="color:#aaa; display:block; margin-bottom:5px;">Duración en Pantalla:</label>
-            <select [(ngModel)]="celebrationForm.durationSeconds" class="count-input" style="width:100%; padding:10px; background:#222; color:#fff;">
-              <option [ngValue]="5">5 segundos</option>
-              <option [ngValue]="8">8 segundos (Recomendado)</option>
-              <option [ngValue]="10">10 segundos</option>
-              <option [ngValue]="15">15 segundos</option>
-            </select>
+            <label style="color:#ffd700; font-weight:bold; display:block; margin-bottom:5px;">Duración en Pantalla (Segundos):</label>
+            <input type="number" [(ngModel)]="celebrationForm.durationSeconds" min="1" max="300" class="count-input" style="width:100%; padding:10px; font-size:1em;" placeholder="Ej: 8 (8 seg)">
+            <p style="color:#aaa; font-size:0.8em; margin-top:4px;">Permanece visible {{ celebrationForm.durationSeconds || 0 }} segundo(s)</p>
+            <div style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap;">
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.durationSeconds = 5">5 seg</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.durationSeconds = 8">8 seg</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.durationSeconds = 12">12 seg</button>
+              <button class="btn-remove-compact" style="background:#222; border:1px solid #444; border-radius:4px; padding:2px 6px; font-size:0.75em; color:#ddd;" (click)="celebrationForm.durationSeconds = 20">20 seg</button>
+            </div>
           </div>
         </div>
 
@@ -357,6 +374,75 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
         <button class="btn-action btn-secondary" (click)="step.set('location')">
           ⬅️ Volver a Selección de Sede
         </button>
+      </div>
+
+      <!-- STEP 8: AUDIT LOGS SECTION -->
+      <div *ngIf="step() === 'audit_logs'" class="admin-container editor-container">
+        <h2 style="color:#39ff14; margin-bottom:10px;">📜 HISTORIAL DE CAMBIOS Y ACTIVIDAD</h2>
+        <p style="color:#aaa; font-size:0.9em; margin-bottom:20px;">
+          Registro de auditoría de todas las modificaciones realizadas en el sistema.
+        </p>
+
+        <div *ngIf="auditLogService.isLoading()" style="color:#fff; padding:20px;">
+          Cargando registros de auditoría...
+        </div>
+
+        <div *ngIf="!auditLogService.isLoading()" class="audit-log-list">
+          <div *ngFor="let log of auditLogService.logs()" class="audit-log-card">
+            <div class="audit-header">
+              <span class="audit-date">📅 {{ log.formattedDate }}</span>
+              <span class="audit-user">👤 {{ log.email }}</span>
+            </div>
+            <div class="audit-action">⚡ {{ log.action }}</div>
+            <div *ngIf="log.details" class="audit-details">📝 {{ log.details }}</div>
+          </div>
+          <div *ngIf="auditLogService.logs().length === 0" style="color:#666; padding:20px;">
+            No hay registros de actividad aún.
+          </div>
+        </div>
+
+        <button class="btn-action btn-secondary" style="margin-top:20px;" (click)="step.set('location')">
+          ⬅️ Volver a Selección de Sede
+        </button>
+      </div>
+
+      <!-- LIVE TV SIMULATOR OVERLAY MODAL -->
+      <div *ngIf="showLiveSimulator()" class="simulator-modal-overlay">
+        <div class="simulator-window">
+          <div class="simulator-header">
+            <span>📺 SIMULADOR DE PANTALLA TV EN VIVO (VISTA PREVIA)</span>
+            <button class="btn-close-sim" (click)="showLiveSimulator.set(false)">✕ Cerrar</button>
+          </div>
+
+          <div class="simulator-frame">
+            <div class="simulated-tv-screen">
+              <div class="sim-header">
+                <span class="sim-date">Jueves, 24 de Julio</span>
+                <span class="sim-time" style="color:#39ff14;">10:45 AM</span>
+                <span class="sim-badge">SEDE MIRAFLORES - 1 / 3</span>
+              </div>
+
+              <div class="sim-body">
+                <h3 style="color:#ff0000; font-size:2em; margin-bottom:10px;">METCON (TIEMPO)</h3>
+                <p style="font-size:1.3em; line-height:1.4;">
+                  <strong>AMRAP 12'</strong><br>
+                  15 Wall Balls<br>
+                  12 Kettlebell Swings (<span style="color:#39ff14; font-weight:bold;">24/16 kg</span>)<br>
+                  9 Burpees Over Box
+                </p>
+              </div>
+
+              <!-- Simulación de Banner de Celebración si está activo -->
+              <div *ngIf="celebrationService.config().enabled" class="sim-celebration-banner">
+                <span style="font-size:2em;">🎉</span>
+                <div>
+                  <strong style="color:#ffd700; display:block;">{{ celebrationService.config().title }}</strong>
+                  <span style="color:#ddd; font-size:0.85em;">{{ celebrationService.config().subtitle }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -747,10 +833,142 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       font-size: 0.78em;
       color: #ddd;
     }
+
+    .audit-log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      text-align: left;
+      margin-top: 15px;
+    }
+
+    .audit-log-card {
+      background: #111;
+      border: 1px solid #333;
+      border-left: 4px solid #39ff14;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .audit-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8em;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .audit-action {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.95em;
+    }
+
+    .audit-details {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .simulator-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .simulator-window {
+      background: #111;
+      border: 1px solid #00e5ff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+      overflow: hidden;
+    }
+
+    .simulator-header {
+      background: #1a1a1a;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      font-weight: bold;
+      color: #00e5ff;
+      font-size: 0.9em;
+    }
+
+    .btn-close-sim {
+      background: none;
+      border: none;
+      color: #ff4444;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .simulator-frame {
+      padding: 20px;
+      background: #000;
+      display: flex;
+      justify-content: center;
+    }
+
+    .simulated-tv-screen {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #050505;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75em;
+      color: #aaa;
+    }
+
+    .sim-body {
+      text-align: center;
+      margin: auto 0;
+    }
+
+    .sim-celebration-banner {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 20, 0.95);
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      padding: 8px 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+      z-index: 10;
+    }
   `]
 })
 export class AdminComponent implements OnInit {
-  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor' | 'weekly' | 'celebration'>('loading');
+  public step = signal<'login' | 'loading' | 'location' | 'mode' | 'count' | 'editor' | 'weekly' | 'celebration' | 'audit_logs'>('loading');
   public selectedLocation = signal<'miraflores' | 'calacoto'>('miraflores');
   public selectedMode = signal<'new' | 'append'>('append');
 
@@ -760,6 +978,11 @@ export class AdminComponent implements OnInit {
     return email === 'admincross@gmail.com' || email === 'asvins25@gmail.com';
   });
   public isCelebrationAdmin = computed<boolean>(() => this.currentUserEmail().toLowerCase() === 'asvins25@gmail.com');
+
+  public auditLogService = inject(AuditLogService);
+  public celebrationService = inject(CelebrationService);
+  public weeklyWodService = inject(WeeklyWodService);
+  public showLiveSimulator = signal<boolean>(false);
 
   public email = '';
   public password = '';
@@ -1316,22 +1539,26 @@ export class AdminComponent implements OnInit {
     }
   }
 
+  public openAuditLogs(): void {
+    this.auditLogService.fetchRecentLogs();
+    this.step.set('audit_logs');
+  }
+
   public saveCelebrationToFirebase(): void {
     if (!this.isCelebrationAdmin()) {
       alert('Acceso restringido: No tienes permisos para guardar la configuración de celebraciones.');
       return;
     }
-    if (!this.db) return;
     this.isPublishing.set(true);
     this.statusMsg.set('Guardando configuración de celebración en Firebase...');
 
-    set(ref(this.db, 'celebrationConfig'), this.celebrationForm)
+    this.celebrationService.saveConfig(this.celebrationForm, this.currentUserEmail())
       .then(() => {
         this.isPublishing.set(false);
         this.statusMsg.set('¡CONFIGURACIÓN DE CELEBRACIÓN PUBLICADA EN TODAS LAS TVs CON ÉXITO!');
         this.statusColor.set('#00ff00');
       })
-      .catch(err => {
+      .catch((err) => {
         this.isPublishing.set(false);
         this.statusMsg.set(`Error: ${err.message}`);
         this.statusColor.set('orange');

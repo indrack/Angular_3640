@@ -1,0 +1,29 @@
+name: Respaldos Automáticos Semanales de Firebase
+
+on:
+  schedule:
+    # Se ejecuta todos los domingos a las 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Permite ejecución manual desde GitHub Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Descargar respaldo de Firebase Realtime Database
+        run: |
+          mkdir -p backups
+          echo "Realizando copia de seguridad de la base de datos..."
+          curl -s "https://crosssfit--3640-tv-default-rtdb.firebaseio.com/.json" > backups/wod_backup_$(date +'%Y_%m_%d').json
+          echo "Copia de seguridad completada."
+
+      - name: Guardar respaldo en Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          git commit -m "chore(backup): respaldo semanal automático de Firebase Realtime Database" || echo "Sin cambios para commitear"
+          git push || echo "No permissions or no changes"
