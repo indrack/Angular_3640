@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, effect, inject } from '@angular/core';
+import { Component, OnInit, signal, effect, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -27,7 +27,8 @@ import { AdminTvSimulatorComponent } from './components/admin-tv-simulator/admin
     AdminTvSimulatorComponent
   ],
   templateUrl: './admin.component.html',
-  styleUrl: './admin.component.css'
+  styleUrl: './admin.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class AdminComponent implements OnInit {
   public authService = inject(AuthService);

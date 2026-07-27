@@ -8,15 +8,15 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="admin-container">
+    <form (ngSubmit)="onLogin()" class="admin-container">
       <h2 class="neon-title">ACCESO STAFF</h2>
       <div class="input-group">
         <label>Email</label>
-        <input type="email" [(ngModel)]="email" placeholder="admin@crossfit.com">
+        <input type="email" name="email" [(ngModel)]="email" placeholder="admin@crossfit.com">
       </div>
       <div class="input-group relative">
         <label>Contraseña</label>
-        <input [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="password" placeholder="******">
+        <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="password" placeholder="******">
         <span class="eye-icon" (click)="togglePasswordVisibility()" title="Ver contraseña">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -25,16 +25,16 @@ import { AuthService } from '../../../../core/services/auth.service';
           </svg>
         </span>
       </div>
-      <button class="btn-action"
-              [disabled]="authService.isSubmitting() || authService.lockoutSeconds() > 0"
-              (click)="onLogin()">
+      <button type="submit"
+              class="btn-action"
+              [disabled]="authService.isSubmitting() || authService.lockoutSeconds() > 0">
         {{ authService.lockoutSeconds() > 0
             ? 'Bloqueado (' + authService.lockoutSeconds() + 's)'
             : (authService.isSubmitting() ? 'Entrando...' : 'Iniciar Sesión') }}
       </button>
       <div *ngIf="authService.loginError()" class="error-msg">{{ authService.loginError() }}</div>
-      <button class="btn-action btn-secondary" (click)="goToTv.emit()">Ver Pantalla WOD</button>
-    </div>
+      <button type="button" class="btn-action btn-secondary" (click)="goToTv.emit()">Ver Pantalla WOD</button>
+    </form>
   `
 })
 export class AdminLoginComponent {

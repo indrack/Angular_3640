@@ -79,9 +79,9 @@ import { TvAutoScaleDirective } from '../../core/directives/tv-auto-scale.direct
     }
 
     :host ::ng-deep .highlight-rounds {
-      color: #00e5ff;
+      color: #e0f3f5ff;
       font-weight: 800;
-      text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+      text-shadow: 0 0 10px rgba(150, 146, 146, 0.4);
     }
   `]
 })
