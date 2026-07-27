@@ -15,17 +15,18 @@ export class AuthService {
   public isSuperAdmin = computed<boolean>(() => {
     const email = this.currentUserEmail().toLowerCase().trim();
     if (!email) return false;
-    return email === 'admin@crossfit3640.com' ||
+    return email === 'asvins25@gmail.com' ||
+           email === 'admincross@gmail.com' ||
            email === 'indrack.vargas@gmail.com' ||
+           email === 'admin@crossfit3640.com' ||
            email === 'headcoach@crossfit3640.com' ||
-           email === 'staff@crossfit3640.com' ||
            email === 'superadmin@crossfit3640.com';
   });
 
   public isCelebrationAdmin = computed<boolean>(() => {
     const email = this.currentUserEmail().toLowerCase().trim();
     if (!email) return false;
-    return this.isSuperAdmin() ||
+    return email === 'asvins25@gmail.com' ||
            email.includes('festividades') ||
            email.includes('celebracion') ||
            email.includes('eventos');
