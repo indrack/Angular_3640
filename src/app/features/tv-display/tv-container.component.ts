@@ -62,6 +62,7 @@ import { RemoteControlService } from '../../core/services/remote-control.service
       justify-content: center;
       align-items: center;
       background: #000;
+      overflow: hidden;
     }
 
     .bg-logo {

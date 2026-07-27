@@ -10,7 +10,9 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="config().enabled && isVisible()" [class]="'celebration-wrapper position-' + config().position">
+    <div *ngIf="config().enabled" 
+         [class]="'celebration-wrapper position-' + config().position"
+         [class.visible]="isVisible()">
       <!-- Particle Effect Background Layer -->
       <div class="particles-layer" [ngSwitch]="activePreset().particleType">
         <!-- Gold Sparks / Anniversary -->
@@ -107,6 +109,14 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       height: 100%;
       pointer-events: none;
       z-index: 2500;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
+    }
+
+    .celebration-wrapper.visible {
+      opacity: 1;
+      visibility: visible;
     }
 
     .particles-layer {
@@ -115,6 +125,52 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       left: 0;
       width: 100%;
       height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sparkle {
+      position: absolute;
+      font-size: 1.8em;
+      opacity: 0;
+      animation: floatDown 1.8s ease-in-out infinite;
+    }
+
+    @keyframes floatDown {
+      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.95; }
+      75% { opacity: 0.8; }
+      100% { transform: translateY(52%) rotate(180deg); opacity: 0; }
+    }
+
+    .celebration-card {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      background: rgba(15, 15, 15, 0.92);
+      border: 2px solid #ffd700;
+      border-radius: 16px;
+      padding: 12px 20px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.3);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: fit-content;
+      max-width: 85%;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .celebration-wrapper.visible .celebration-card {
+      transform: translateX(-50%) scale(1);
+    }
+
+    .position-top { top: 25px; }
+    .position-center { top: 50%; transform: translate(-50%, -50%) scale(0.9); }
+    .celebration-wrapper.visible .position-center { transform: translate(-50%, -50%) scale(1); }
+    .position-bottom { bottom: 35px; }
       pointer-events: none;
       overflow: hidden;
     }

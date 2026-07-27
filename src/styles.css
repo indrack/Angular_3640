@@ -13,6 +13,16 @@ body, html {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* TV CONTAINER SCOPED DISPLAY LAYOUT (PREVENTS SCROLLBARS ON TV DISPLAY MODE WITHOUT AFFECTING ADMIN) */
+app-tv-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden !important;
+}
+
 /* MEDIA QUERY FOR PORTRAIT / MOBILE PHONES / UNROTATED SCREENS */
 @media (max-width: 768px), (orientation: portrait) {
   .tv-container {
