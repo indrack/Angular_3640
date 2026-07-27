@@ -133,14 +133,24 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
       position: absolute;
       font-size: 1.8em;
       opacity: 0;
-      animation: floatDown 1.8s ease-in-out infinite;
+      animation: floatDown 2.2s ease-in-out infinite;
     }
 
     @keyframes floatDown {
-      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
-      20% { opacity: 0.95; }
-      75% { opacity: 0.8; }
-      100% { transform: translateY(52%) rotate(180deg); opacity: 0; }
+      0% {
+        transform: translateY(-40px) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.95;
+      }
+      85% {
+        opacity: 0.85;
+      }
+      100% {
+        transform: translateY(100%) rotate(180deg);
+        opacity: 0;
+      }
     }
 
     .celebration-card {
@@ -170,46 +180,6 @@ import { CelebrationConfig, CELEBRATION_PRESETS, DEFAULT_CELEBRATION_CONFIG, Cel
     .position-top { top: 25px; }
     .position-center { top: 50%; transform: translate(-50%, -50%) scale(0.9); }
     .celebration-wrapper.visible .position-center { transform: translate(-50%, -50%) scale(1); }
-    .position-bottom { bottom: 35px; }
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .sparkle {
-      position: absolute;
-      font-size: 1.8em;
-      opacity: 0;
-      animation: floatDown 1.8s ease-in-out infinite;
-    }
-
-    @keyframes floatDown {
-      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
-      20% { opacity: 0.95; }
-      75% { opacity: 0.8; }
-      100% { transform: translateY(52%) rotate(180deg); opacity: 0; }
-    }
-
-    .celebration-card {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 15, 15, 0.92);
-      border: 2px solid #ffd700;
-      border-radius: 16px;
-      padding: 12px 20px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.3);
-      backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      width: fit-content;
-      max-width: 85%;
-    }
-
-    .position-top { top: 25px; }
-    .position-center { top: 50%; transform: translate(-50%, -50%); }
     .position-bottom { bottom: 35px; }
 
     .animate-card {
