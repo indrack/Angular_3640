@@ -20,7 +20,7 @@
 
 ## 🔒 3. Seguridad y Variables de Entorno
 - **Credenciales en GitHub (Repositorio Público)**:
-  - `src/environments/environment.prod.ts` debe estar estrictamente incluido en `.gitignore`.
+  - `src/environments/environment.prod.ts` debe estar strictly incluido en `.gitignore`.
   - Las llaves de Firebase se inyectan en GitHub Actions durante la compilación a través de **GitHub Repository Secrets** (`FIREBASE_API_KEY`, `FIREBASE_PROJECT_ID`, etc.).
 - **Reglas de Seguridad en Firebase Realtime Database**:
   - Lectura pública (`.read: true`) para que los televisores del box puedan descargar los WODs.
@@ -47,3 +47,13 @@
 - **Herramientas de Conversión**:
   - **Vía Web**: Panel `/admin` -> `📄 Importar / Pasar Rutina Semanal (.TXT)`.
   - **Vía CLI**: `python3 scripts/update_wods.py <archivo.txt> [--wgirls]`.
+
+---
+
+## 🏛️ 5. Arquitectura por Capas y Componentes Modulares
+- **Estructura por Capas**:
+  - **`src/app/core/`**: Aloja la lógica de negocio reusable, servicios de datos/auth (`services/`), modelos e interfaces (`models/`), datos estáticos fallback (`data/`) y utilidades puras (`utils/`).
+  - **`src/app/features/`**: Aloja los módulos de UI por característica (ej. `tv-display/`, `admin/`).
+- **Descomposición de Componentes**:
+  - **Prohibido componentes monolíticos (>300 líneas)**: Las vistas complejas deben dividirse en subcomponentes dentro de una carpeta `components/` perteneciente a la feature correspondiente.
+  - **Separación de Plantillas y Estilos**: Se deben separar las plantillas HTML (`.html`) y hojas de estilo (`.css`) de la lógica TypeScript (`.ts`) para mantener un código limpio y legible.

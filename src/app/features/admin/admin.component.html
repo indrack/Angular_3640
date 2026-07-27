@@ -1,0 +1,86 @@
+<div class="admin-mode">
+  <img src="logo.png" alt="Logo Box" class="admin-logo">
+
+  <!-- STEP: LOGIN -->
+  <app-admin-login
+    *ngIf="step() === 'login'"
+    (goToTv)="goToTv()">
+  </app-admin-login>
+
+  <!-- STEP: LOADING -->
+  <div *ngIf="step() === 'loading'" class="admin-container">
+    <h3 style="color:#fff;">Cargando sistema...</h3>
+  </div>
+
+  <!-- STEP 1: LOCATION SELECTION -->
+  <app-admin-location-selector
+    *ngIf="step() === 'location'"
+    (selectLocation)="onSelectLocation($event)"
+    (openWeeklyManager)="openWeeklyManager()"
+    (openCelebrationManager)="openCelebrationManager()"
+    (openAuditLogs)="openAuditLogs()"
+    (showSimulator)="showLiveSimulator.set(true)"
+    (logout)="onLogout()"
+    (goToTv)="goToTv()">
+  </app-admin-location-selector>
+
+  <!-- STEP 2: MODE SELECTION -->
+  <div *ngIf="step() === 'mode'" class="admin-container">
+    <h2 style="color:#fff; margin-bottom:10px;">GESTIÓN WOD</h2>
+    <p class="selected-label">SEDE: {{ selectedLocation().toUpperCase() }}</p>
+
+    <div class="selection-card" (click)="selectMode('append')">
+      <h3>AGREGAR SLIDE</h3>
+      <p>Mantener lo actual y añadir una nueva pantalla</p>
+    </div>
+
+    <div class="selection-card" (click)="selectMode('new')">
+      <h3>LIMPIAR TODO</h3>
+      <p>Borrar todo y crear WOD desde cero</p>
+    </div>
+
+    <button class="btn-action btn-secondary" (click)="step.set('location')">Volver</button>
+  </div>
+
+  <!-- STEP 3: INITIAL COUNT (IF NEW) -->
+  <div *ngIf="step() === 'count'" class="admin-container">
+    <h2 style="color:#fff;">NUEVO WOD</h2>
+    <p style="color:#aaa; margin-bottom:20px;">¿Cuántas pantallas iniciales?</p>
+    <input type="number" [(ngModel)]="slideCount" min="1" max="10" class="count-input">
+    <button class="btn-action" (click)="step.set('editor')">Continuar</button>
+    <button class="btn-action btn-secondary" (click)="step.set('mode')">Cancelar</button>
+  </div>
+
+  <!-- STEP 4: WOD EDITOR -->
+  <app-admin-wod-editor
+    *ngIf="step() === 'editor'"
+    [selectedLocation]="selectedLocation()"
+    [selectedMode]="selectedMode()"
+    [initialSlideCount]="slideCount"
+    (goToTv)="goToTv()">
+  </app-admin-wod-editor>
+
+  <!-- STEP 5: WEEKLY WOD MANAGER -->
+  <app-admin-weekly-manager
+    *ngIf="step() === 'weekly'"
+    (backToLocation)="step.set('location')">
+  </app-admin-weekly-manager>
+
+  <!-- STEP 6: CELEBRATION MANAGER -->
+  <app-admin-celebration-manager
+    *ngIf="step() === 'celebration'"
+    (backToLocation)="step.set('location')">
+  </app-admin-celebration-manager>
+
+  <!-- STEP 7: AUDIT LOGS -->
+  <app-admin-audit-logs
+    *ngIf="step() === 'audit_logs'"
+    (backToLocation)="step.set('location')">
+  </app-admin-audit-logs>
+
+  <!-- LIVE TV SIMULATOR MODAL -->
+  <app-admin-tv-simulator
+    *ngIf="showLiveSimulator()"
+    (close)="showLiveSimulator.set(false)">
+  </app-admin-tv-simulator>
+</div>
