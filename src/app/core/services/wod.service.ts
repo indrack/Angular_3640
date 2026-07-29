@@ -22,6 +22,7 @@ export class WodService {
   public firebaseMiraflores = signal<WodItem[]>([]);
   public firebaseCalacoto = signal<WodItem[]>([]);
   public firebaseWeeklyWods = signal<DayWods | null>(null);
+  public isConnected = signal<boolean>(true);
 
   private db: Database | null = null;
 
@@ -38,6 +39,10 @@ export class WodService {
         app = getApps()[0];
       }
       this.db = getDatabase(app);
+
+      onValue(ref(this.db, '.info/connected'), (snapshot) => {
+        this.isConnected.set(snapshot.val() === true);
+      });
 
       onValue(ref(this.db, 'customWodMiraflores'), (snapshot) => {
         const val = snapshot.val();

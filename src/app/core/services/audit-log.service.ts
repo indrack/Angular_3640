@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { initializeApp, getApps } from 'firebase/app';
-import { getDatabase, ref, push, get, query, limitToLast, Database } from 'firebase/database';
+import { getDatabase, ref, push, get, query, orderByKey, limitToLast, remove, Database } from 'firebase/database';
 import { FIREBASE_CONFIG } from '../config/firebase.config';
 
 export interface AuditLogEntry {
@@ -43,24 +43,40 @@ export class AuditLogService {
     }
   }
 
-  public async fetchRecentLogs(limit: number = 20): Promise<void> {
+  public async fetchRecentLogs(limit: number = 50): Promise<void> {
     if (!this.db) return;
     this.isLoading.set(true);
     try {
-      const logsRef = query(ref(this.db, 'activityLogs'), limitToLast(limit));
+      const logsRef = query(ref(this.db, 'activityLogs'), orderByKey(), limitToLast(limit));
       const snapshot = await get(logsRef);
       const val = snapshot.val();
       if (val && typeof val === 'object') {
-        const list: AuditLogEntry[] = Object.keys(val).map(key => ({
-          id: key,
-          ...val[key]
-        })).sort((a, b) => b.timestamp - a.timestamp);
+        const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+        const keysToDelete: string[] = [];
+
+        const list: AuditLogEntry[] = Object.keys(val).map(key => {
+          const item = val[key];
+          if (item && item.timestamp && item.timestamp < ninetyDaysAgo) {
+            keysToDelete.push(key);
+          }
+          return { id: key, ...item };
+        }).filter(item => !item.timestamp || item.timestamp >= ninetyDaysAgo)
+          .sort((a, b) => b.timestamp - a.timestamp);
+
         this.logs.set(list);
+
+        // Auto-purge old logs from Firebase silently
+        if (keysToDelete.length > 0) {
+          for (const key of keysToDelete) {
+            remove(ref(this.db, `activityLogs/${key}`)).catch(() => {});
+          }
+        }
       } else {
         this.logs.set([]);
       }
     } catch (err) {
       console.warn('Error al obtener registros de auditoría:', err);
+      this.logs.set([]);
     } finally {
       this.isLoading.set(false);
     }

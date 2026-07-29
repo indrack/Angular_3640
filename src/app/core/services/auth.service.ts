@@ -1,35 +1,45 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject, OnDestroy } from '@angular/core';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence, Auth, User } from 'firebase/auth';
 import { FIREBASE_CONFIG } from '../config/firebase.config';
+import { AuditLogService } from './audit-log.service';
+
+const SUPER_ADMIN_EMAILS: readonly string[] = [
+  'asvins25@gmail.com'
+];
+
+const WEEKLY_ADMIN_EMAILS: readonly string[] = [
+  'asvins25@gmail.com',
+  'admincross@gmail.com'
+];
+
+const CELEBRATION_ADMIN_EMAILS: readonly string[] = [
+  'asvins25@gmail.com'
+];
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private auth: Auth | null = null;
+  private auditLogService = inject(AuditLogService);
 
   public currentUserEmail = signal<string>('');
   public isAuthenticated = computed<boolean>(() => !!this.currentUserEmail());
 
   public isSuperAdmin = computed<boolean>(() => {
     const email = this.currentUserEmail().toLowerCase().trim();
-    if (!email) return false;
-    return email === 'asvins25@gmail.com' ||
-           email === 'admincross@gmail.com' ||
-           email === 'indrack.vargas@gmail.com' ||
-           email === 'admin@crossfit3640.com' ||
-           email === 'headcoach@crossfit3640.com' ||
-           email === 'superadmin@crossfit3640.com';
+    return email ? SUPER_ADMIN_EMAILS.includes(email) : false;
+  });
+
+  public isWeeklyAdmin = computed<boolean>(() => {
+    const email = this.currentUserEmail().toLowerCase().trim();
+    return email ? WEEKLY_ADMIN_EMAILS.includes(email) : false;
   });
 
   public isCelebrationAdmin = computed<boolean>(() => {
     const email = this.currentUserEmail().toLowerCase().trim();
-    if (!email) return false;
-    return email === 'asvins25@gmail.com' ||
-           email.includes('festividades') ||
-           email.includes('celebracion') ||
-           email.includes('eventos');
+    return email ? CELEBRATION_ADMIN_EMAILS.includes(email) : false;
   });
 
   public remainingAttempts = signal<number>(5);
@@ -38,10 +48,17 @@ export class AuthService {
   public isSubmitting = signal<boolean>(false);
   public isAuthInitialized = signal<boolean>(false);
 
-  private lockoutTimer: any = null;
+  private lockoutTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.initFirebase();
+  }
+
+  ngOnDestroy(): void {
+    if (this.lockoutTimer) {
+      clearInterval(this.lockoutTimer);
+      this.lockoutTimer = null;
+    }
   }
 
   private initFirebase(): void {
@@ -82,16 +99,21 @@ export class AuthService {
       if (this.lockoutTimer) clearInterval(this.lockoutTimer);
       if (userCredential.user && userCredential.user.email) {
         this.currentUserEmail.set(userCredential.user.email);
+        await this.auditLogService.logAction(
+          userCredential.user.email,
+          'Inicio de Sesión',
+          'Ingreso exitoso al panel de administración'
+        );
       }
       return true;
     } catch (error: any) {
       this.isSubmitting.set(false);
-      this.handleFailedAttempt(error?.code || '');
+      this.handleFailedAttempt(email, error?.code || '');
       return false;
     }
   }
 
-  private handleFailedAttempt(errorCode: string): void {
+  private handleFailedAttempt(attemptedEmail: string, errorCode: string): void {
     if (errorCode === 'auth/network-request-failed') {
       this.loginError.set('Error de conexión a internet. Verifica tu red.');
       return;
@@ -99,6 +121,13 @@ export class AuthService {
 
     const current = this.remainingAttempts() - 1;
     this.remainingAttempts.set(current);
+
+    // Audit log failed attempt asynchronously
+    this.auditLogService.logAction(
+      attemptedEmail || 'Anónimo',
+      'Intento Fallido de Inicio de Sesión',
+      `Credenciales incorrectas. Intentos restantes: ${current}`
+    ).catch(() => {});
 
     if (current > 0) {
       const plural = current === 1 ? 'intento' : 'intentos';
@@ -116,7 +145,8 @@ export class AuthService {
     this.lockoutTimer = setInterval(() => {
       const remaining = this.lockoutSeconds() - 1;
       if (remaining <= 0) {
-        clearInterval(this.lockoutTimer);
+        if (this.lockoutTimer) clearInterval(this.lockoutTimer);
+        this.lockoutTimer = null;
         this.lockoutSeconds.set(0);
         this.remainingAttempts.set(5);
         this.loginError.set('Ya puedes intentar iniciar sesión nuevamente.');
@@ -128,12 +158,20 @@ export class AuthService {
   }
 
   public async logout(): Promise<void> {
+    const userEmail = this.currentUserEmail();
     if (this.auth) {
       try {
         await signOut(this.auth);
       } catch (e) {
         console.warn('Sign out warning:', e);
       }
+    }
+    if (userEmail) {
+      await this.auditLogService.logAction(
+        userEmail,
+        'Cierre de Sesión',
+        'Salida del panel de administración'
+      );
     }
     this.currentUserEmail.set('');
     this.loginError.set('');

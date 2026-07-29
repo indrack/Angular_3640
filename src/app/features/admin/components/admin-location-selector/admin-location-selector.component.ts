@@ -23,7 +23,7 @@ import { AuthService } from '../../../../core/services/auth.service';
         <p>Control Remoto Botón 7</p>
       </div>
 
-      <div *ngIf="authService.isSuperAdmin()" class="selection-card weekly-card" (click)="openWeeklyManager.emit()">
+      <div *ngIf="authService.isWeeklyAdmin()" class="selection-card weekly-card" (click)="openWeeklyManager.emit()">
         <h3 style="color:#00e5ff;">📅 WODS DE LA SEMANA</h3>
         <p>Ver rutina actual por días, editar o importar .TXT semanal</p>
       </div>

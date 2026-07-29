@@ -80,7 +80,7 @@ export class AdminComponent implements OnInit {
   }
 
   public openWeeklyManager(): void {
-    if (!this.authService.isSuperAdmin()) {
+    if (!this.authService.isWeeklyAdmin()) {
       alert('Acceso restringido: Esta opción solo está disponible para Administradores de Rutinas Semanales.');
       return;
     }

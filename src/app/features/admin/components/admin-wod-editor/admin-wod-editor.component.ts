@@ -6,6 +6,7 @@ import { getDatabase, ref, set, get, Database } from 'firebase/database';
 import { FIREBASE_CONFIG } from '../../../../core/config/firebase.config';
 import { WodItem } from '../../../../core/models/wod.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { AuditLogService } from '../../../../core/services/audit-log.service';
 
 @Component({
   selector: 'app-admin-wod-editor',
@@ -21,6 +22,14 @@ import { AuthService } from '../../../../core/services/auth.service';
       <div class="help-text">
         <strong>TIP:</strong> Para poner texto en <strong>negrita</strong>, enciérralo entre asteriscos.<br>
         Ejemplo: <code>Calentamiento: *3 Rondas* de...</code>
+      </div>
+
+      <div *ngIf="hasDraft()" class="help-text" style="background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; margin-bottom: 15px;">
+        💡 Existe un borrador guardado automáticamente de una edición previa.
+        <div style="margin-top: 8px; display: flex; gap: 10px;">
+          <button class="btn-action" style="padding: 5px 12px; font-size: 0.85em; background: #ffd700; color: #000; font-weight: bold;" (click)="restoreDraft()">Restaurar Borrador</button>
+          <button class="btn-action btn-secondary" style="padding: 5px 12px; font-size: 0.85em;" (click)="clearDraft()">Descartar Borrador</button>
+        </div>
       </div>
 
       <div class="txt-import-box">
@@ -83,6 +92,7 @@ export class AdminWodEditorComponent implements OnInit {
   @Output() goToTv = new EventEmitter<void>();
 
   public authService = inject(AuthService);
+  public auditLogService = inject(AuditLogService);
   public slides: WodItem[] = [];
   public showTxtImport = signal<boolean>(false);
   public rawTxtInput = '';
@@ -90,6 +100,7 @@ export class AdminWodEditorComponent implements OnInit {
   public isPublishing = signal<boolean>(false);
   public statusMsg = signal<string>('');
   public statusColor = signal<string>('#fff');
+  public hasDraft = signal<boolean>(false);
 
   private db: Database | null = null;
 
@@ -97,10 +108,68 @@ export class AdminWodEditorComponent implements OnInit {
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
     this.db = getDatabase(app);
 
+    this.checkDraftInLocalStorage();
+
     if (this.selectedMode === 'new') {
       this.initNewSlides();
     } else {
       this.loadExistingSlides();
+    }
+  }
+
+  private getDraftKey(): string {
+    return `wod_draft_${this.selectedLocation}`;
+  }
+
+  private checkDraftInLocalStorage(): void {
+    try {
+      const saved = localStorage.getItem(this.getDraftKey());
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.hasDraft.set(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Error al verificar borrador local:', e);
+    }
+  }
+
+  public saveDraftToLocalStorage(): void {
+    try {
+      if (this.slides && this.slides.length > 0) {
+        localStorage.setItem(this.getDraftKey(), JSON.stringify(this.slides));
+        this.hasDraft.set(true);
+      }
+    } catch (e) {
+      console.warn('Error al guardar borrador local:', e);
+    }
+  }
+
+  public restoreDraft(): void {
+    try {
+      const saved = localStorage.getItem(this.getDraftKey());
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.slides = parsed;
+          this.statusMsg.set('Borrador restaurado con éxito.');
+          this.statusColor.set('#00e5ff');
+        }
+      }
+    } catch (e) {
+      alert('Error al restaurar borrador: ' + e);
+    }
+  }
+
+  public clearDraft(): void {
+    try {
+      localStorage.removeItem(this.getDraftKey());
+      this.hasDraft.set(false);
+      this.statusMsg.set('Borrador descartado.');
+      this.statusColor.set('#aaa');
+    } catch (e) {
+      console.warn('Error al descartar borrador:', e);
     }
   }
 
@@ -130,10 +199,12 @@ export class AdminWodEditorComponent implements OnInit {
 
   public addSlideField(): void {
     this.slides.push({ titulo: '', contenido: '' });
+    this.saveDraftToLocalStorage();
   }
 
   public removeSlide(index: number): void {
     this.slides.splice(index, 1);
+    this.saveDraftToLocalStorage();
   }
 
   public publishToFirebase(): void {
@@ -143,9 +214,16 @@ export class AdminWodEditorComponent implements OnInit {
       if (!confirm('¿Estás seguro de publicar VACÍO? Esto borrará el WOD de la pantalla.')) return;
     }
 
+    const allEmpty = this.slides.every(s => !s.titulo?.trim() && !s.contenido?.trim());
+    if (allEmpty && this.slides.length > 0) {
+      if (!confirm('⚠️ Todas las pantallas de la lista están en blanco. ¿Seguro que deseas publicar en blanco?')) {
+        return;
+      }
+    }
+
     const cleanedData = this.slides.map(s => ({
-      titulo: s.titulo || 'SIN TÍTULO',
-      contenido: s.contenido || ''
+      titulo: s.titulo?.trim() || 'WOD',
+      contenido: s.contenido?.trim() || ''
     }));
 
     const dbPath = this.selectedLocation === 'miraflores' ? 'customWodMiraflores' : 'customWodCalacoto';
@@ -154,10 +232,16 @@ export class AdminWodEditorComponent implements OnInit {
     this.statusColor.set('#fff');
 
     set(ref(this.db, dbPath), cleanedData)
-      .then(() => {
+      .then(async () => {
         this.isPublishing.set(false);
         this.statusMsg.set(`¡WOD PUBLICADO CON ÉXITO EN ${this.selectedLocation.toUpperCase()}!`);
         this.statusColor.set('#ff0000');
+        this.clearDraft();
+        await this.auditLogService.logAction(
+          this.authService.currentUserEmail(),
+          `Publicó WOD (${this.selectedLocation.toUpperCase()})`,
+          `${cleanedData.length} pantalla(s) actualizada(s)`
+        );
       })
       .catch((err) => {
         this.isPublishing.set(false);
