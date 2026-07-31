@@ -4,6 +4,9 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPe
 import { FIREBASE_CONFIG } from '../config/firebase.config';
 import { AuditLogService } from './audit-log.service';
 import { environment } from '../../../environments/environment';
+const SUPER_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3'];
+const WEEKLY_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3', '2qCO5Z07nXNkWft4od26Mdw73x42'];
+const CELEBRATION_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3'];
 
 @Injectable({
   providedIn: 'root'
@@ -18,17 +21,20 @@ export class AuthService implements OnDestroy {
 
   public isSuperAdmin = computed<boolean>(() => {
     const uid = this.currentUserId();
-    return uid ? (environment.adminUids?.superAdmin ?? []).includes(uid) : false;
+    const list = (environment as any).adminUids?.superAdmin || SUPER_ADMIN_UIDS;
+    return uid ? list.includes(uid) : false;
   });
 
   public isWeeklyAdmin = computed<boolean>(() => {
     const uid = this.currentUserId();
-    return uid ? (environment.adminUids?.weeklyAdmin ?? []).includes(uid) : false;
+    const list = (environment as any).adminUids?.weeklyAdmin || WEEKLY_ADMIN_UIDS;
+    return uid ? list.includes(uid) : false;
   });
 
   public isCelebrationAdmin = computed<boolean>(() => {
     const uid = this.currentUserId();
-    return uid ? (environment.adminUids?.celebrationAdmin ?? []).includes(uid) : false;
+    const list = (environment as any).adminUids?.celebrationAdmin || CELEBRATION_ADMIN_UIDS;
+    return uid ? list.includes(uid) : false;
   });
 
   public remainingAttempts = signal<number>(5);
