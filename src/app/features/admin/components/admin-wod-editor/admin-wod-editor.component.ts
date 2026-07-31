@@ -237,10 +237,12 @@ export class AdminWodEditorComponent implements OnInit {
         this.statusMsg.set(`¡WOD PUBLICADO CON ÉXITO EN ${this.selectedLocation.toUpperCase()}!`);
         this.statusColor.set('#ff0000');
         this.clearDraft();
+        const locationName = this.selectedLocation === 'miraflores' ? 'TV Miraflores' : 'TV Calacoto';
+        const modeLabel = this.selectedMode === 'new' ? 'Nueva rutina' : 'Añadir bloques';
         await this.auditLogService.logAction(
           this.authService.currentUserEmail(),
-          `Publicó WOD (${this.selectedLocation.toUpperCase()})`,
-          `${cleanedData.length} pantalla(s) actualizada(s)`
+          `Publicó WOD en ${locationName}`,
+          `Cambios en ${locationName} (Modo: ${modeLabel}, ${cleanedData.length} bloque(s)/pantalla(s))`
         );
       })
       .catch((err) => {

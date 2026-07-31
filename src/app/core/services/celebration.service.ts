@@ -60,8 +60,12 @@ export class CelebrationService {
       this.config.set(newConfig);
 
       const preset = this.presets.find(p => p.key === newConfig.presetKey);
-      const actionText = newConfig.enabled ? `Activó celebración: ${preset?.name || newConfig.title}` : 'Desactivó celebraciones';
-      await this.auditLogService.logAction(userEmail, actionText, `Intervalo: ${newConfig.intervalSeconds}s, Duración: ${newConfig.durationSeconds}s`);
+      const cardTitle = preset?.name || newConfig.title || 'Tarjeta Personalizada';
+      const statusText = newConfig.enabled ? 'Activa' : 'Desactivada';
+      const actionText = newConfig.enabled ? `Activó celebración: ${cardTitle}` : 'Desactivó celebraciones';
+      const detailsText = `Cambios en Tarjeta de Celebración: ${cardTitle} (${statusText}, Intervalo: ${newConfig.intervalSeconds}s, Duración: ${newConfig.durationSeconds}s)`;
+
+      await this.auditLogService.logAction(userEmail, actionText, detailsText);
     } finally {
       this.isLoading.set(false);
     }

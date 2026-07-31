@@ -3,19 +3,7 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence, Auth, User } from 'firebase/auth';
 import { FIREBASE_CONFIG } from '../config/firebase.config';
 import { AuditLogService } from './audit-log.service';
-
-const SUPER_ADMIN_EMAILS: readonly string[] = [
-  'asvins25@gmail.com'
-];
-
-const WEEKLY_ADMIN_EMAILS: readonly string[] = [
-  'asvins25@gmail.com',
-  'admincross@gmail.com'
-];
-
-const CELEBRATION_ADMIN_EMAILS: readonly string[] = [
-  'asvins25@gmail.com'
-];
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -25,21 +13,22 @@ export class AuthService implements OnDestroy {
   private auditLogService = inject(AuditLogService);
 
   public currentUserEmail = signal<string>('');
+  public currentUserId = signal<string>('');
   public isAuthenticated = computed<boolean>(() => !!this.currentUserEmail());
 
   public isSuperAdmin = computed<boolean>(() => {
-    const email = this.currentUserEmail().toLowerCase().trim();
-    return email ? SUPER_ADMIN_EMAILS.includes(email) : false;
+    const uid = this.currentUserId();
+    return uid ? (environment.adminUids?.superAdmin ?? []).includes(uid) : false;
   });
 
   public isWeeklyAdmin = computed<boolean>(() => {
-    const email = this.currentUserEmail().toLowerCase().trim();
-    return email ? WEEKLY_ADMIN_EMAILS.includes(email) : false;
+    const uid = this.currentUserId();
+    return uid ? (environment.adminUids?.weeklyAdmin ?? []).includes(uid) : false;
   });
 
   public isCelebrationAdmin = computed<boolean>(() => {
-    const email = this.currentUserEmail().toLowerCase().trim();
-    return email ? CELEBRATION_ADMIN_EMAILS.includes(email) : false;
+    const uid = this.currentUserId();
+    return uid ? (environment.adminUids?.celebrationAdmin ?? []).includes(uid) : false;
   });
 
   public remainingAttempts = signal<number>(5);
@@ -69,8 +58,10 @@ export class AuthService implements OnDestroy {
       onAuthStateChanged(this.auth, (user: User | null) => {
         if (user && user.email) {
           this.currentUserEmail.set(user.email);
+          this.currentUserId.set(user.uid);
         } else {
           this.currentUserEmail.set('');
+          this.currentUserId.set('');
         }
         this.isAuthInitialized.set(true);
       });
@@ -99,6 +90,7 @@ export class AuthService implements OnDestroy {
       if (this.lockoutTimer) clearInterval(this.lockoutTimer);
       if (userCredential.user && userCredential.user.email) {
         this.currentUserEmail.set(userCredential.user.email);
+        this.currentUserId.set(userCredential.user.uid);
         await this.auditLogService.logAction(
           userCredential.user.email,
           'Inicio de Sesión',
@@ -174,6 +166,7 @@ export class AuthService implements OnDestroy {
       );
     }
     this.currentUserEmail.set('');
+    this.currentUserId.set('');
     this.loginError.set('');
   }
 }

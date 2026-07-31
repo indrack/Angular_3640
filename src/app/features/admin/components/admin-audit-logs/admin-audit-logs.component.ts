@@ -29,8 +29,15 @@ import { AuditLogService } from '../../../../core/services/audit-log.service';
             <span class="audit-date">📅 {{ log.formattedDate }}</span>
             <span class="audit-user">👤 {{ log.email }}</span>
           </div>
-          <div class="audit-action">⚡ {{ log.action }}</div>
-          <div *ngIf="log.details" class="audit-details">📝 {{ log.details }}</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+            <span class="audit-tag" [ngStyle]="getBadgeStyle(log)">
+              {{ getBadgeLabel(log) }}
+            </span>
+            <span class="audit-action">⚡ {{ log.action }}</span>
+          </div>
+          <div *ngIf="log.details" class="audit-details" style="margin-top:8px; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; border-left:3px solid #00e5ff;">
+            📝 <b>Detalle del Cambio:</b> {{ log.details }}
+          </div>
         </div>
         <div *ngIf="auditLogService.logs().length === 0" style="color:#888; padding:20px;">
           No hay registros de actividad aún.
@@ -54,5 +61,37 @@ export class AdminAuditLogsComponent implements OnInit {
 
   public refreshLogs(): void {
     this.auditLogService.fetchRecentLogs();
+  }
+
+  public getBadgeLabel(log: any): string {
+    const text = `${log.action} ${log.details || ''}`.toLowerCase();
+    if (text.includes('calacoto')) return '📍 TV CALACOTO';
+    if (text.includes('miraflores')) return '📍 TV MIRAFLORES';
+    if (text.includes('semanal') || text.includes('rutina')) return '📅 RUTINA SEMANAL';
+    if (text.includes('celebraci')) return '🎉 CELEBRACIÓN';
+    if (text.includes('sesión') || text.includes('sesion')) return '🔑 ACCESO';
+    return '📌 SISTEMA';
+  }
+
+  public getBadgeStyle(log: any): Record<string, string> {
+    const label = this.getBadgeLabel(log);
+    let bg = '#444';
+    let color = '#fff';
+
+    if (label.includes('CALACOTO')) { bg = '#0055ff'; color = '#fff'; }
+    else if (label.includes('MIRAFLORES')) { bg = '#ff6600'; color = '#fff'; }
+    else if (label.includes('SEMANAL')) { bg = '#00a859'; color = '#fff'; }
+    else if (label.includes('CELEBRACIÓN')) { bg = '#8a2be2'; color = '#fff'; }
+    else if (label.includes('ACCESO')) { bg = '#333'; color = '#aaa'; }
+
+    return {
+      'background-color': bg,
+      'color': color,
+      'padding': '2px 8px',
+      'border-radius': '4px',
+      'font-size': '0.75em',
+      'font-weight': 'bold',
+      'display': 'inline-block'
+    };
   }
 }

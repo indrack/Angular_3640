@@ -51,15 +51,42 @@ export class WeeklyWodService {
     if (!this.db) throw new Error('Base de datos no inicializada');
     this.isLoading.set(true);
     try {
+      const previous = this.weeklyWodsData();
+
+      const dayLabels: Record<string, string> = {
+        lunes: 'Lunes',
+        martes: 'Martes',
+        miercoles: 'Miércoles',
+        jueves: 'Jueves',
+        viernes: 'Viernes',
+        sabado: 'Sábado',
+        domingo: 'Domingo'
+      };
+
+      const changedDays: string[] = [];
+      const allDays: DayName[] = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+
+      allDays.forEach(day => {
+        const prevBlocks = JSON.stringify(previous[day] || []);
+        const newBlocks = JSON.stringify(data[day] || []);
+        if (prevBlocks !== newBlocks) {
+          changedDays.push(dayLabels[day] || day);
+        }
+      });
+
       await set(ref(this.db, 'weeklyWods'), data);
       this.weeklyWodsData.set(data);
 
-      let totalBlocks = 0;
-      Object.keys(data).forEach(d => {
-        totalBlocks += (data[d as DayName] || []).length;
-      });
+      let detailsText = '';
+      if (changedDays.length === 0) {
+        detailsText = 'Rutina semanal guardada sin modificaciones';
+      } else if (changedDays.length === 7) {
+        detailsText = 'Actualización completa de toda la rutina semanal (7 días)';
+      } else {
+        detailsText = `Cambios en: ${changedDays.join(', ')} (${changedDays.length} ${changedDays.length === 1 ? 'día modificado' : 'días modificados'})`;
+      }
 
-      await this.auditLogService.logAction(userEmail, 'Publicó la Rutina Semanal', `${totalBlocks} bloques actualizados para la semana`);
+      await this.auditLogService.logAction(userEmail, 'Publicación de Rutina Semanal', detailsText);
     } finally {
       this.isLoading.set(false);
     }

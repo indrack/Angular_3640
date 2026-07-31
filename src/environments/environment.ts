@@ -8,5 +8,11 @@ export const environment = {
     storageBucket: "crosssfit--3640-tv.firebasestorage.app",
     messagingSenderId: "908256000888",
     appId: "1:908256000888:web:09e4bffb19519b8784668d"
+  },
+  adminUids: {
+    superAdmin: ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3'],
+    weeklyAdmin: ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3', '2qCO5Z07nXNkWft4od26Mdw73x42'],
+    celebrationAdmin: ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3']
   }
 };
+
