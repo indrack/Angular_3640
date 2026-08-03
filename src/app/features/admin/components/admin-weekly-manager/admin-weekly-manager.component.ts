@@ -16,6 +16,27 @@ import { parseWeeklyTxt } from '../../../../core/utils/txt-parser.util';
       <h2 style="color:#fff; margin-bottom:5px;">📅 GESTIÓN WODS DE LA SEMANA</h2>
       <p class="editor-label">VISTA COMPACTA Y PROGRAMACIÓN DE LA SEMANA</p>
 
+      <!-- ROUTINE TYPE TOGGLE SELECTOR -->
+      <div style="display:flex; justify-content:center; gap:12px; margin: 15px 0 20px 0;">
+        <button class="btn-action" 
+                [style.background]="activeRoutineType() === 'general' ? '#00e5ff' : '#222'"
+                [style.color]="activeRoutineType() === 'general' ? '#000' : '#aaa'"
+                [style.border]="activeRoutineType() === 'general' ? '2px solid #00e5ff' : '1px solid #444'"
+                style="padding:10px 18px; font-weight:bold; font-size:0.95em;"
+                (click)="switchRoutineType('general')">
+          🏋️‍♂️ RUTINA GENERAL (WODS)
+        </button>
+
+        <button class="btn-action" 
+                [style.background]="activeRoutineType() === 'wgirls' ? '#ff007f' : '#222'"
+                [style.color]="activeRoutineType() === 'wgirls' ? '#fff' : '#aaa'"
+                [style.border]="activeRoutineType() === 'wgirls' ? '2px solid #ff007f' : '1px solid #444'"
+                style="padding:10px 18px; font-weight:bold; font-size:0.95em;"
+                (click)="switchRoutineType('wgirls')">
+          💃 RUTINA W-GIRLS
+        </button>
+      </div>
+
       <!-- DAY TABS -->
       <div class="day-tabs">
         <button *ngFor="let day of daysList"
@@ -30,7 +51,10 @@ import { parseWeeklyTxt } from '../../../../core/utils/txt-parser.util';
       <!-- COMPACT DAY VIEW -->
       <div class="compact-day-card">
         <div class="compact-day-header">
-          <h3>{{ selectedWeeklyDay().toUpperCase() }}</h3>
+          <h3>
+            {{ selectedWeeklyDay().toUpperCase() }}
+            <span *ngIf="activeRoutineType() === 'wgirls'" style="color:#ff007f; font-size:0.8em;"> (W-GIRLS)</span>
+          </h3>
           <span style="color:#aaa; font-size:0.85em;">
             {{ (weeklyWodsData[selectedWeeklyDay()] || []).length }} bloque(s) programado(s)
           </span>
@@ -63,7 +87,7 @@ import { parseWeeklyTxt } from '../../../../core/utils/txt-parser.util';
       <!-- IMPORT WEEKLY TXT BOX -->
       <div class="txt-import-box" style="margin-top:20px;">
         <button class="btn-action btn-secondary" (click)="showWeeklyTxtImport.update(v => !v)">
-          {{ showWeeklyTxtImport() ? '✕ Cerrar Importador .TXT Semanal' : '📄 Importar / Parsear Rutina Semanal (.TXT)' }}
+          {{ showWeeklyTxtImport() ? '✕ Cerrar Importador .TXT Semanal' : ('📄 Importar / Parsear Rutina ' + (activeRoutineType() === 'wgirls' ? 'W-Girls' : 'Semanal') + ' (.TXT)') }}
         </button>
 
         <div *ngIf="showWeeklyTxtImport()" class="txt-import-content">
@@ -76,18 +100,21 @@ import { parseWeeklyTxt } from '../../../../core/utils/txt-parser.util';
             <textarea [(ngModel)]="rawWeeklyTxt" style="height:150px;" placeholder="------------------------Lunes---------------------------&#10;Warmup&#10;...&#10;Custom Metcon&#10;..."></textarea>
           </div>
           <button class="btn-action" style="background:#0088cc;" (click)="convertAndApplyWeeklyTxt()">
-            ⚡ Pasar Texto a la Semana
+            ⚡ Pasar Texto a {{ activeRoutineType() === 'wgirls' ? 'W-Girls' : 'la Semana' }}
           </button>
         </div>
       </div>
 
       <!-- ACTION BUTTONS -->
-      <button class="btn-action" [disabled]="isPublishing()" (click)="saveWeeklyWodsToFirebase()">
-        ☁️ {{ isPublishing() ? 'PUBLICANDO...' : 'PUBLICAR RUTINA SEMANAL EN TV EN VIVO' }}
+      <button class="btn-action" 
+              [disabled]="isPublishing()" 
+              [style.background]="activeRoutineType() === 'wgirls' ? '#ff007f' : ''"
+              (click)="saveWeeklyWodsToFirebase()">
+        ☁️ {{ isPublishing() ? 'PUBLICANDO...' : ('PUBLICAR RUTINA ' + (activeRoutineType() === 'wgirls' ? 'W-GIRLS' : 'SEMANAL') + ' EN TV EN VIVO') }}
       </button>
 
       <button class="btn-action btn-secondary" (click)="copyWeeklyTsCode()">
-        📋 Copiar Código TypeScript (wods.data.ts)
+        📋 Copiar Código TypeScript ({{ activeRoutineType() === 'wgirls' ? 'wgirls.data.ts' : 'wods.data.ts' }})
       </button>
 
       <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
@@ -106,6 +133,7 @@ export class AdminWeeklyManagerComponent implements OnInit {
 
   @Output() backToLocation = new EventEmitter<void>();
 
+  public activeRoutineType = signal<'general' | 'wgirls'>('general');
   public daysList: DayName[] = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
   public selectedWeeklyDay = signal<DayName>('lunes');
   public weeklyWodsData: DayWods = JSON.parse(JSON.stringify(WODS_DATA));
@@ -118,9 +146,27 @@ export class AdminWeeklyManagerComponent implements OnInit {
   public statusColor = signal<string>('#fff');
 
   async ngOnInit(): Promise<void> {
-    const fetched = await this.weeklyWodService.fetchWeeklyWods();
-    if (fetched) {
-      this.weeklyWodsData = JSON.parse(JSON.stringify(fetched));
+    await this.loadCurrentRoutine();
+  }
+
+  public async switchRoutineType(type: 'general' | 'wgirls'): Promise<void> {
+    if (this.activeRoutineType() === type) return;
+    this.activeRoutineType.set(type);
+    this.statusMsg.set('');
+    await this.loadCurrentRoutine();
+  }
+
+  private async loadCurrentRoutine(): Promise<void> {
+    if (this.activeRoutineType() === 'wgirls') {
+      const fetched = await this.weeklyWodService.fetchWeeklyWodsWGirls();
+      if (fetched) {
+        this.weeklyWodsData = JSON.parse(JSON.stringify(fetched));
+      }
+    } else {
+      const fetched = await this.weeklyWodService.fetchWeeklyWods();
+      if (fetched) {
+        this.weeklyWodsData = JSON.parse(JSON.stringify(fetched));
+      }
     }
   }
 
@@ -177,9 +223,10 @@ export class AdminWeeklyManagerComponent implements OnInit {
     }
 
     try {
-      const newWeeklyData = parseWeeklyTxt(this.rawWeeklyTxt);
+      const isWGirls = this.activeRoutineType() === 'wgirls';
+      const newWeeklyData = this.weeklyWodService.parseWeeklyTxt(this.rawWeeklyTxt, isWGirls);
       this.weeklyWodsData = newWeeklyData;
-      this.statusMsg.set('¡Rutina semanal parseada correctamente! Revisa las pestañas arriba.');
+      this.statusMsg.set(`¡${isWGirls ? 'Rutina W-Girls' : 'Rutina semanal'} parseada correctamente! Revisa las pestañas arriba.`);
       this.statusColor.set('#00ff00');
       this.showWeeklyTxtImport.set(false);
     } catch (err: any) {
@@ -189,13 +236,19 @@ export class AdminWeeklyManagerComponent implements OnInit {
 
   public async saveWeeklyWodsToFirebase(): Promise<void> {
     this.isPublishing.set(true);
-    this.statusMsg.set('Publicando rutina semanal en Firebase...');
+    const isWGirls = this.activeRoutineType() === 'wgirls';
+    const label = isWGirls ? 'RUTINA W-GIRLS' : 'RUTINA SEMANAL GENERAL';
+    this.statusMsg.set(`Publicando ${label.toLowerCase()} en Firebase...`);
     this.statusColor.set('#fff');
 
     try {
-      await this.weeklyWodService.saveWeeklyWodsToFirebase(this.weeklyWodsData, this.authService.currentUserEmail());
+      await this.weeklyWodService.saveWeeklyWodsToFirebase(
+        this.weeklyWodsData, 
+        this.authService.currentUserEmail(),
+        isWGirls
+      );
       this.isPublishing.set(false);
-      this.statusMsg.set('¡RUTINA SEMANAL PUBLICADA CON ÉXITO EN TODAS LAS PANTALLAS!');
+      this.statusMsg.set(`¡${label} PUBLICADA CON ÉXITO EN TODAS LAS PANTALLAS!`);
       this.statusColor.set('#00ff00');
     } catch (err: any) {
       this.isPublishing.set(false);
@@ -205,9 +258,12 @@ export class AdminWeeklyManagerComponent implements OnInit {
   }
 
   public copyWeeklyTsCode(): void {
-    const code = `import { DayWods } from '../models/wod.model';\n\nexport const WODS_DATA: DayWods = ${JSON.stringify(this.weeklyWodsData, null, 2)};\n`;
+    const isWGirls = this.activeRoutineType() === 'wgirls';
+    const varName = isWGirls ? 'WGIRLS_DATA' : 'WODS_DATA';
+    const fileName = isWGirls ? 'wgirls.data.ts' : 'wods.data.ts';
+    const code = `import { DayWods } from '../models/wod.model';\n\nexport const ${varName}: DayWods = ${JSON.stringify(this.weeklyWodsData, null, 2)};\n`;
     navigator.clipboard.writeText(code).then(() => {
-      alert('¡Código TypeScript copiado al portapapeles! Puedes pegarlo en src/app/core/data/wods.data.ts');
+      alert(`¡Código TypeScript copiado al portapapeles! Puedes pegarlo en src/app/core/data/${fileName}`);
     }).catch(err => {
       alert('Error al copiar: ' + err);
     });

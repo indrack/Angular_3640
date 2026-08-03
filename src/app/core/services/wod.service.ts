@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, onValue, Database } from 'firebase/database';
 import { WodItem, ActiveMode, DayName, DayWods } from '../models/wod.model';
@@ -22,12 +22,51 @@ export class WodService {
   public firebaseMiraflores = signal<WodItem[]>([]);
   public firebaseCalacoto = signal<WodItem[]>([]);
   public firebaseWeeklyWods = signal<DayWods | null>(null);
+  public firebaseWeeklyWodsWGirls = signal<DayWods | null>(null);
+  public cachedDailyWod = signal<WodItem[] | null>(null);
   public isConnected = signal<boolean>(true);
 
   private db: Database | null = null;
 
   constructor() {
+    this.loadDailyWodFromCache();
     this.initFirebase();
+
+    // Auto-respaldo transparente en localStorage cuando cambia el WOD del día
+    effect(() => {
+      const parts = this.currentWodParts();
+      const connected = this.isConnected();
+      if (parts && parts.length > 0 && connected) {
+        this.saveDailyWodToCache(parts);
+      }
+    });
+  }
+
+  private loadDailyWodFromCache(): void {
+    try {
+      const cachedStr = localStorage.getItem('cached_daily_wod');
+      if (cachedStr) {
+        const parsed = JSON.parse(cachedStr);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.cachedDailyWod.set(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Error al leer caché del WOD diario:', e);
+    }
+  }
+
+  private saveDailyWodToCache(parts: WodItem[]): void {
+    try {
+      // Ignorar pantallas de carga/espera para no sobrescribir el respaldo con mensajes vacíos
+      if (parts.length === 1 && (parts[0].contenido?.includes('Esperando WOD') || parts[0].titulo?.includes('DESCANSO'))) {
+        return;
+      }
+      localStorage.setItem('cached_daily_wod', JSON.stringify(parts));
+      this.cachedDailyWod.set(parts);
+    } catch (e) {
+      console.warn('Error al guardar caché del WOD diario:', e);
+    }
   }
 
   private initFirebase(): void {
@@ -60,6 +99,13 @@ export class WodService {
           this.firebaseWeeklyWods.set(val);
         }
       });
+
+      onValue(ref(this.db, 'weeklyWodsWGirls'), (snapshot) => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.firebaseWeeklyWodsWGirls.set(val);
+        }
+      });
     } catch (e) {
       console.warn('Firebase connection unavailable or using offline mode');
     }
@@ -73,19 +119,27 @@ export class WodService {
   public currentWodParts = computed<WodItem[]>(() => {
     const mode = this.activeMode();
     const day = this.currentDayName();
+    const cached = this.cachedDailyWod();
 
     if (mode === 'miraflores') {
       const mira = this.firebaseMiraflores();
-      return mira.length > 0 ? mira : [{ titulo: 'MIRAFLORES', contenido: 'Esperando WOD...' }];
+      if (mira.length > 0) return mira;
+      if (cached && cached.length > 0) return cached;
+      return [{ titulo: 'MIRAFLORES', contenido: 'Esperando WOD...' }];
     }
 
     if (mode === 'calacoto') {
       const cala = this.firebaseCalacoto();
-      return cala.length > 0 ? cala : [{ titulo: 'CALACOTO', contenido: 'Esperando WOD...' }];
+      if (cala.length > 0) return cala;
+      if (cached && cached.length > 0) return cached;
+      return [{ titulo: 'CALACOTO', contenido: 'Esperando WOD...' }];
     }
 
     if (mode === 'wgirls') {
-      const girlsData = WGIRLS_DATA[day];
+      const firebaseGirls = this.firebaseWeeklyWodsWGirls();
+      const girlsData = (firebaseGirls && firebaseGirls[day] && firebaseGirls[day].length > 0)
+        ? firebaseGirls[day]
+        : WGIRLS_DATA[day];
       return (girlsData && girlsData.length > 0)
         ? girlsData
         : [{ titulo: 'WGIRLS DESCANSO', contenido: 'Box Cerrado / Open Box' }];
@@ -93,7 +147,15 @@ export class WodService {
 
     // Default normal WOD
     const firebaseWeekly = this.firebaseWeeklyWods();
-    const normalData = (firebaseWeekly && firebaseWeekly[day]) ? firebaseWeekly[day] : WODS_DATA[day];
+    if (firebaseWeekly && firebaseWeekly[day] && firebaseWeekly[day].length > 0) {
+      return firebaseWeekly[day];
+    }
+    // Si no hay datos de Firebase en tiempo real pero tenemos caché guardado en la TV
+    if (cached && cached.length > 0) {
+      return cached;
+    }
+    // Respaldo de fábrica estático
+    const normalData = WODS_DATA[day];
     return (normalData && normalData.length > 0)
       ? normalData
       : [{ titulo: 'DESCANSO', contenido: 'Box Cerrado / Open Box' }];

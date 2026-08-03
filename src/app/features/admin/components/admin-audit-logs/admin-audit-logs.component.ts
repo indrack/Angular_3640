@@ -65,6 +65,7 @@ export class AdminAuditLogsComponent implements OnInit {
 
   public getBadgeLabel(log: any): string {
     const text = `${log.action} ${log.details || ''}`.toLowerCase();
+    if (text.includes('wgirls') || text.includes('w-girls')) return '💃 RUTINA W-GIRLS';
     if (text.includes('calacoto')) return '📍 TV CALACOTO';
     if (text.includes('miraflores')) return '📍 TV MIRAFLORES';
     if (text.includes('semanal') || text.includes('rutina')) return '📅 RUTINA SEMANAL';
@@ -78,7 +79,8 @@ export class AdminAuditLogsComponent implements OnInit {
     let bg = '#444';
     let color = '#fff';
 
-    if (label.includes('CALACOTO')) { bg = '#0055ff'; color = '#fff'; }
+    if (label.includes('W-GIRLS')) { bg = '#ff007f'; color = '#fff'; }
+    else if (label.includes('CALACOTO')) { bg = '#0055ff'; color = '#fff'; }
     else if (label.includes('MIRAFLORES')) { bg = '#ff6600'; color = '#fff'; }
     else if (label.includes('SEMANAL')) { bg = '#00a859'; color = '#fff'; }
     else if (label.includes('CELEBRACIÓN')) { bg = '#8a2be2'; color = '#fff'; }
