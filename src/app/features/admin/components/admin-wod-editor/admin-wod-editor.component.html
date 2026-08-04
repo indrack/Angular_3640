@@ -1,0 +1,69 @@
+<div class="admin-container editor-container">
+  <h2 style="color:#fff; margin-bottom:10px;">EDITAR CONTENIDO</h2>
+  <p class="editor-label">
+    EDITANDO: {{ selectedLocation.toUpperCase() }} | MODO: {{ selectedMode === 'new' ? 'REEMPLAZAR TODO' : 'AGREGAR' }}
+  </p>
+
+  <div class="help-text">
+    <strong>TIP:</strong> Para poner texto en <strong>negrita</strong>, enciérralo entre asteriscos.<br>
+    Ejemplo: <code>Calentamiento: *3 Rondas* de...</code>
+  </div>
+
+  <div *ngIf="hasDraft()" class="help-text" style="background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; margin-bottom: 15px;">
+    💡 Existe un borrador guardado automáticamente de una edición previa.
+    <div style="margin-top: 8px; display: flex; gap: 10px;">
+      <button class="btn-action" style="padding: 5px 12px; font-size: 0.85em; background: #ffd700; color: #000; font-weight: bold;" (click)="restoreDraft()">Restaurar Borrador</button>
+      <button class="btn-action btn-secondary" style="padding: 5px 12px; font-size: 0.85em;" (click)="clearDraft()">Descartar Borrador</button>
+    </div>
+  </div>
+
+  <div class="txt-import-box">
+    <button class="btn-action btn-secondary" (click)="toggleTxtImport()">
+      {{ showTxtImport() ? '✕ Cerrar Convertidor TXT' : '📄 Importar / Autoconvertir desde Texto (.TXT)' }}
+    </button>
+
+    <div *ngIf="showTxtImport()" class="txt-import-content">
+      <p style="color:#aaa; font-size:0.9em; margin:10px 0;">
+        Pega el texto de tu WOD o sube un archivo <code>.txt</code>. Las secciones separadas por salto de línea doble se convertirán en pantallas automáticamente.
+      </p>
+      <div class="input-group">
+        <input type="file" (change)="onFileUpload($event)" accept=".txt" style="margin-bottom:10px;">
+        <textarea [(ngModel)]="rawTxtInput" placeholder="Ejemplo:&#10;&#10;WARM-UP&#10;*2 SETS*&#10;1:00 Cardio Choice&#10;8 PVC Pass Throughs&#10;&#10;Custom Metcon&#10;For time:&#10;21-15-9..."></textarea>
+      </div>
+      <button class="btn-action" style="background:#0088cc;" (click)="convertAndApplyTxt()">
+        ⚡ Convertir Texto a Pantallas
+      </button>
+    </div>
+  </div>
+
+  <div class="slides-container">
+    <div *ngFor="let slide of slides; let i = index" class="slide-block">
+      <span class="slide-num">#{{ i + 1 }}</span>
+      <h3 style="color:#ff0000; text-align:left; margin-top:0;">Pantalla {{ i + 1 }}</h3>
+      <div class="input-group">
+        <label>Título</label>
+        <input type="text" [(ngModel)]="slide.titulo" placeholder="Ej: WOD, CALENTAMIENTO...">
+      </div>
+      <div class="input-group">
+        <label>Contenido (*usar asteriscos para negrita*)</label>
+        <textarea [(ngModel)]="slide.contenido" placeholder="Escribe aquí el ejercicio..."></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button (click)="removeSlide(i)" class="btn-remove">[Eliminar esta pantalla]</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-action btn-secondary dashed-btn" (click)="addSlideField()">
+    + Agregar otra pantalla
+  </button>
+
+  <button class="btn-action" [disabled]="isPublishing()" (click)="publishToFirebase()">
+    ☁️ {{ isPublishing() ? 'PUBLICANDO...' : 'PUBLICAR EN TV' }}
+  </button>
+
+  <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
+    {{ statusMsg() }}
+  </div>
+  <button class="btn-action btn-secondary" (click)="goToTv.emit()">Ver Pantalla WOD / Salir</button>
+</div>

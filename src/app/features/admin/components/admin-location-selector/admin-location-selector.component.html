@@ -1,0 +1,40 @@
+<div class="admin-container">
+  <h2 style="color:#fff; margin-bottom:5px;">SELECCIONA SEDE</h2>
+  <p style="color:#888; font-size:0.85em; margin-bottom:25px;">
+    Sesión activa: <b style="color:#00e5ff;">{{ authService.currentUserEmail() }}</b>
+  </p>
+
+  <div class="selection-card" (click)="selectLocation.emit('calacoto')">
+    <h3>CALACOTO (TV 8)</h3>
+    <p>Control Remoto Botón 8</p>
+  </div>
+
+  <div class="selection-card" (click)="selectLocation.emit('miraflores')">
+    <h3>MIRAFLORES (TV 7)</h3>
+    <p>Control Remoto Botón 7</p>
+  </div>
+
+  <div *ngIf="authService.isWeeklyAdmin()" class="selection-card weekly-card" (click)="openWeeklyManager.emit()">
+    <h3 style="color:#00e5ff;">📅 WODS DE LA SEMANA</h3>
+    <p>Ver rutina actual por días, editar o importar .TXT semanal</p>
+  </div>
+
+  <div *ngIf="authService.isCelebrationAdmin()" class="selection-card celebration-card" (click)="openCelebrationManager.emit()">
+    <h3 style="color:#ffd700;">🎉 CELEBRACIONES Y FESTIVIDADES</h3>
+    <p>Aniversario, Navidad, San Valentín, Festividades y PNG Personalizado</p>
+  </div>
+
+  <div class="selection-card" style="border-color:#39ff14;" (click)="openAuditLogs.emit()">
+    <h3 style="color:#39ff14;">📜 HISTORIAL DE CAMBIOS</h3>
+    <p>Registro de auditoría de actividad y modificaciones del sistema</p>
+  </div>
+
+  <button class="btn-action" style="margin-top:15px; background:#00e5ff; color:#000; font-weight:bold;" (click)="showSimulator.emit()">
+    👁️ Probar en Simulador TV en Vivo
+  </button>
+
+  <button class="btn-action" style="margin-top:15px; background:#cc3333;" (click)="onLogout()">
+    🚪 Cerrar Sesión
+  </button>
+  <button class="btn-action btn-secondary" (click)="goToTv.emit()">Ver Pantalla WOD</button>
+</div>
