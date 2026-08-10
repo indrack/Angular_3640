@@ -20,6 +20,7 @@ export class AdminWodEditorComponent implements OnInit {
   @Input() initialSlideCount = 1;
 
   @Output() goToTv = new EventEmitter<void>();
+  @Output() backToLocation = new EventEmitter<void>();
 
   public authService = inject(AuthService);
   public auditLogService = inject(AuditLogService);

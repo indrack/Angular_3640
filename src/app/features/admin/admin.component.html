@@ -57,6 +57,7 @@
     [selectedLocation]="selectedLocation()"
     [selectedMode]="selectedMode()"
     [initialSlideCount]="slideCount"
+    (backToLocation)="step.set('location')"
     (goToTv)="goToTv()">
   </app-admin-wod-editor>
 

@@ -65,5 +65,8 @@
   <div *ngIf="statusMsg()" class="status-msg" [style.color]="statusColor()">
     {{ statusMsg() }}
   </div>
-  <button class="btn-action btn-secondary" (click)="goToTv.emit()">Ver Pantalla WOD / Salir</button>
+  <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%;">
+    <button class="btn-action btn-secondary" style="flex: 1;" (click)="backToLocation.emit()">⬅ Volver al Menú Admin</button>
+    <button class="btn-action btn-secondary" style="flex: 1;" (click)="goToTv.emit()">📺 Ver Pantalla WOD / Salir</button>
+  </div>
 </div>
