@@ -246,8 +246,8 @@ export class WodService {
     // 3. Highlight weights/loads: (e.g. 60/42.5, 92.5/60, 20/14 lbs, 32/24)
     formatted = formatted.replace(/(\b\d+(?:\.\d+)?\/\d+(?:\.\d+)?(?:\s*(?:lbs|kg|in))?\b)/gi, '<span class="highlight-weight">$1</span>');
 
-    // 4. Highlight sets/rounds/schemes: (e.g. 21-15-9, 3 SETS, 2 SETS, 2 ROUNDS, AMRAP 12', AMRAP)
-    formatted = formatted.replace(/(\b\d+-\d+-\d+\b|\b\d+\s+(?:SETS|ROUNDS|RFT|AMRAP)\b|\bAMRAP\b)/gi, '<span class="highlight-rounds">$1</span>');
+    // 4. Highlight sets/rounds/schemes/teams: (e.g. 21-15-9, 3 SETS, 2 SETS, 2 ROUNDS, AMRAP 12', AMRAP, Teams of 2, Equipos de 2)
+    formatted = formatted.replace(/(\b\d+-\d+-\d+\b|\b\d+\s+(?:SETS|ROUNDS|RFT|AMRAP)\b|\bAMRAP\b|\b(?:(?:IN\s+)?TEAMS?\s+OF|EQUIPOS?\s+DE)\s+\d+\b)/gi, '<span class="highlight-rounds">$1</span>');
 
     return formatted;
   }

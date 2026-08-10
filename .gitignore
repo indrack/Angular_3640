@@ -80,3 +80,7 @@ src/environments/environment.prod.ts
 .env.production.local
 .env*.local
 
+# Documentation Markdown files
+*.md
+!README.md
+
