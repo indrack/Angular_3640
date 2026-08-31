@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DayWods, DayName } from '../../../../core/models/wod.model';
+import { DayWods, DayName, WodItem } from '../../../../core/models/wod.model';
 import { WODS_DATA } from '../../../../core/data/wods.data';
 import { WeeklyWodService } from '../../../../core/services/weekly-wod.service';
 import { AuthService } from '../../../../core/services/auth.service';
