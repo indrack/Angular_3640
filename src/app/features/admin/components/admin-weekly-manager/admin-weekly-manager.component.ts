@@ -7,10 +7,12 @@ import { WeeklyWodService } from '../../../../core/services/weekly-wod.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { parseWeeklyTxt } from '../../../../core/utils/txt-parser.util';
 
+import { AdminTvSimulatorComponent } from '../admin-tv-simulator/admin-tv-simulator.component';
+
 @Component({
   selector: 'app-admin-weekly-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminTvSimulatorComponent],
   templateUrl: './admin-weekly-manager.component.html'
 })
 export class AdminWeeklyManagerComponent implements OnInit {
@@ -30,6 +32,23 @@ export class AdminWeeklyManagerComponent implements OnInit {
   public isPublishing = signal<boolean>(false);
   public statusMsg = signal<string>('');
   public statusColor = signal<string>('#fff');
+  public showWeeklyPreview = signal<boolean>(false);
+  public previewSlideIndex = signal<number>(0);
+
+  public openWeeklyPreview(index: number = 0): void {
+    this.previewSlideIndex.set(index);
+    this.showWeeklyPreview.set(true);
+  }
+
+  public getContextTitle(): string {
+    const day = this.selectedWeeklyDay().toUpperCase();
+    const type = this.activeRoutineType() === 'wgirls' ? 'W-GIRLS' : 'GENERAL';
+    return `${day} (${type})`;
+  }
+
+  public getSelectedDaySlides(): WodItem[] {
+    return this.weeklyWodsData[this.selectedWeeklyDay()] || [];
+  }
 
   async ngOnInit(): Promise<void> {
     await this.loadCurrentRoutine();

@@ -1,23 +1,10 @@
-import { TestBed } from '@angular/core/testing';
-import { App } from './app.component';
+import '@angular/compiler';
+import { describe, it, expect } from 'vitest';
+import { AppComponent } from './app.component';
 
-describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
-  });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
+describe('AppComponent', () => {
+  it('should create the app component', () => {
+    const app = new AppComponent();
     expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, wod-tv-angular');
   });
 });

@@ -1,8 +1,14 @@
 <div class="admin-container editor-container">
   <h2 style="color:#fff; margin-bottom:10px;">EDITAR CONTENIDO</h2>
-  <p class="editor-label">
-    EDITANDO: {{ selectedLocation.toUpperCase() }} | MODO: {{ selectedMode === 'new' ? 'REEMPLAZAR TODO' : 'AGREGAR' }}
-  </p>
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    <p class="editor-label" style="margin-bottom: 0;">
+      EDITANDO: {{ selectedLocation.toUpperCase() }} | MODO: {{ selectedMode === 'new' ? 'REEMPLAZAR TODO' : 'AGREGAR' }}
+    </p>
+    <button class="btn-mini-tv" (click)="openPreview(0)" title="Previsualizar cómo se verá en la TV">
+      👁️ TV
+    </button>
+  </div>
 
   <div class="help-text">
     <strong>TIP:</strong> Para poner texto en <strong>negrita</strong>, enciérralo entre asteriscos.<br>
@@ -38,8 +44,15 @@
 
   <div class="slides-container">
     <div *ngFor="let slide of slides; let i = index" class="slide-block">
-      <span class="slide-num">#{{ i + 1 }}</span>
-      <h3 style="color:#ff0000; text-align:left; margin-top:0;">Pantalla {{ i + 1 }}</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="color:#ff0000; text-align:left; margin: 0;">Pantalla {{ i + 1 }}</h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="btn-mini-tv" style="padding: 2px 8px; font-size: 0.78em;" (click)="openPreview(i)" title="Previsualizar esta pantalla en TV">
+            👁️ TV
+          </button>
+          <span class="slide-num" style="position: static;">#{{ i + 1 }}</span>
+        </div>
+      </div>
       <div class="input-group">
         <label>Título</label>
         <input type="text" [(ngModel)]="slide.titulo" placeholder="Ej: WOD, CALENTAMIENTO...">
@@ -69,4 +82,13 @@
     <button class="btn-action btn-secondary" style="flex: 1;" (click)="backToLocation.emit()">⬅ Volver al Menú Admin</button>
     <button class="btn-action btn-secondary" style="flex: 1;" (click)="goToTv.emit()">📺 Ver Pantalla WOD / Salir</button>
   </div>
+
+  <!-- POP-UP MODAL VISTA PREVIA TV -->
+  <app-admin-tv-simulator
+    *ngIf="showPreview()"
+    [slides]="slides"
+    [contextTitle]="'TV ' + selectedLocation.toUpperCase()"
+    [initialSlideIndex]="previewSlideIndex()"
+    (close)="showPreview.set(false)">
+  </app-admin-tv-simulator>
 </div>

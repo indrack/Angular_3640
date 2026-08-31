@@ -1,29 +1,42 @@
-<div class="simulator-modal-overlay">
+<div class="simulator-modal-overlay" (click)="$event.target === $event.currentTarget && close.emit()">
   <div class="simulator-window">
     <div class="simulator-header">
-      <span>📺 SIMULADOR DE PANTALLA TV EN VIVO (VISTA PREVIA)</span>
-      <button class="btn-close-sim" (click)="close.emit()">✕ Cerrar</button>
+      <div class="sim-title-group">
+        <span class="sim-main-title">📺 VISTA PREVIA EN PANTALLA TV</span>
+        <span class="sim-context-tag">{{ contextTitle }}</span>
+      </div>
+      <div class="sim-header-actions">
+        <button class="btn-toggle-orient" (click)="toggleOrientation()" title="Cambiar formato de pantalla">
+          {{ orientationMode() === 'vertical' ? '📱 Formato Vertical (Box)' : '🖥️ Formato Panorámico' }}
+        </button>
+        <button class="btn-close-sim" (click)="close.emit()" title="Cerrar vista previa">✕ Cerrar</button>
+      </div>
     </div>
 
     <div class="simulator-frame">
-      <div class="simulated-tv-screen">
-        <div class="sim-header">
-          <span class="sim-date">Jueves, 24 de Julio</span>
-          <span class="sim-time" style="color:#39ff14;">10:45 AM</span>
-          <span class="sim-badge">SEDE MIRAFLORES - 1 / 3</span>
+      <div class="simulated-tv-screen" [ngClass]="'mode-' + orientationMode()">
+        <!-- Marca de agua Logo -->
+        <img src="logo.png" class="sim-bg-logo" alt="Logo Box 3640">
+
+        <!-- Header simulado de TV -->
+        <div class="sim-top-header">
+          <div class="sim-datetime-box">
+            <span class="sim-date">{{ clockService.currentDate() }}</span>
+            <span class="sim-time">{{ clockService.currentTime() }}</span>
+            <span class="sim-live-dot" title="En vivo"></span>
+          </div>
+          <div class="sim-slide-badge">
+            {{ indicatorText() }}
+          </div>
         </div>
 
-        <div class="sim-body">
-          <h3 style="color:#ff0000; font-size:2em; margin-bottom:10px;">METCON (TIEMPO)</h3>
-          <p style="font-size:1.3em; line-height:1.4;">
-            <strong>AMRAP 12'</strong><br>
-            15 Wall Balls<br>
-            12 Kettlebell Swings (<span style="color:#39ff14; font-weight:bold;">24/16 kg</span>)<br>
-            9 Burpees Over Box
-          </p>
+        <!-- Cuerpo del WOD / Slide con formato real -->
+        <div class="sim-body-content">
+          <h3 class="sim-wod-title">{{ currentSlide().titulo }}</h3>
+          <p class="sim-wod-text" [innerHTML]="formatMarkdownText(currentSlide().contenido)"></p>
         </div>
 
-        <!-- Simulación de Banner de Celebración si está activo -->
+        <!-- Banner de Celebración si está activo en Firebase -->
         <div *ngIf="celebrationService.config().enabled" class="sim-celebration-banner">
           <ng-container *ngIf="celebrationService.config().presetKey === 'custom'">
             <img *ngIf="celebrationService.config().customImageUrl" [src]="celebrationService.config().customImageUrl" class="sim-custom-icon" alt="Icon">
@@ -31,12 +44,41 @@
           <ng-container *ngIf="celebrationService.config().presetKey !== 'custom'">
             <span style="font-size:1.6em;">{{ getCelebrationIcon() }}</span>
           </ng-container>
-          <div>
-            <strong style="color:#ffd700; display:block;">{{ celebrationService.config().title }}</strong>
-            <span style="color:#ddd; font-size:0.85em;">{{ celebrationService.config().subtitle }}</span>
+          <div style="text-align:left;">
+            <strong style="color:#ffd700; display:block; font-size:0.9em;">{{ celebrationService.config().title }}</strong>
+            <span style="color:#ddd; font-size:0.75em;">{{ celebrationService.config().subtitle }}</span>
           </div>
         </div>
+
+        <!-- Controles de navegación en TV -->
+        <div class="sim-nav-bar">
+          <button class="sim-nav-btn"
+                  [disabled]="!hasPrev()"
+                  [style.opacity]="hasPrev() ? '1' : '0.25'"
+                  (click)="prevSlide()"
+                  title="Pantalla anterior (Flecha Izq)">&#9664;</button>
+
+          <div class="sim-dots-container">
+            <span *ngFor="let s of effectiveSlides(); let idx = index"
+                  class="sim-dot-pill"
+                  [class.active]="idx === currentSlideIndex()"
+                  (click)="goToSlide(idx)"
+                  [title]="'Ir a pantalla ' + (idx + 1)">
+              {{ idx + 1 }}
+            </span>
+          </div>
+
+          <button class="sim-nav-btn"
+                  [disabled]="!hasNext()"
+                  [style.opacity]="hasNext() ? '1' : '0.25'"
+                  (click)="nextSlide()"
+                  title="Siguiente pantalla (Flecha Der)">&#9654;</button>
+        </div>
       </div>
+    </div>
+
+    <div class="simulator-footer-hint">
+      <span>⌨️ Atajos: Flechas <strong>◀ / ▶</strong> para navegar entre pantallas | <strong>Esc</strong> para cerrar</span>
     </div>
   </div>
 </div>

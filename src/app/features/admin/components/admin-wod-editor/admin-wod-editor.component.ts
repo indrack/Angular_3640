@@ -8,10 +8,12 @@ import { WodItem } from '../../../../core/models/wod.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuditLogService } from '../../../../core/services/audit-log.service';
 
+import { AdminTvSimulatorComponent } from '../admin-tv-simulator/admin-tv-simulator.component';
+
 @Component({
   selector: 'app-admin-wod-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminTvSimulatorComponent],
   templateUrl: './admin-wod-editor.component.html'
 })
 export class AdminWodEditorComponent implements OnInit {
@@ -32,6 +34,13 @@ export class AdminWodEditorComponent implements OnInit {
   public statusMsg = signal<string>('');
   public statusColor = signal<string>('#fff');
   public hasDraft = signal<boolean>(false);
+  public showPreview = signal<boolean>(false);
+  public previewSlideIndex = signal<number>(0);
+
+  public openPreview(index: number = 0): void {
+    this.previewSlideIndex.set(index);
+    this.showPreview.set(true);
+  }
 
   private db: Database | null = null;
 

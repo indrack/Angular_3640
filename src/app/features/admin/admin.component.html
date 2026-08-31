@@ -82,6 +82,7 @@
   <!-- LIVE TV SIMULATOR MODAL -->
   <app-admin-tv-simulator
     *ngIf="showLiveSimulator()"
+    [contextTitle]="'PANTALLA EN VIVO'"
     (close)="showLiveSimulator.set(false)">
   </app-admin-tv-simulator>
 </div>
