@@ -426,6 +426,42 @@ def run_sync(email, password, target_week="next", dry_run=True, publish_firebase
 
     return weekly_result
 
+def generate_ts_code(wod_data):
+    """Genera código TypeScript para wods.data.ts a partir del diccionario de WODs."""
+    ts_lines = ["import { DayWods } from '../models/wod.model';\n"]
+    ts_lines.append("export const WODS_DATA: DayWods = {")
+
+    days_order = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
+
+    for day in days_order:
+        items = wod_data.get(day, [])
+        ts_lines.append(f"  {day}: [")
+        for item in items:
+            title = item['titulo'].replace("'", "\\'")
+            content = item['contenido'].replace('`', '\\`').replace('${', '\\${')
+            ts_lines.append("    {")
+            ts_lines.append(f"      titulo: '{title}',")
+            ts_lines.append(f"      contenido: `{content}`")
+            ts_lines.append("    },")
+        ts_lines.append("  ],")
+
+    ts_lines.append("};\n")
+    return "\n".join(ts_lines)
+
+def update_offline_wods_file(weekly_result):
+    """Actualiza src/app/core/data/wods.data.ts para el respaldo offline del sistema."""
+    try:
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        target_path = os.path.join(project_root, "src", "app", "core", "data", "wods.data.ts")
+        ts_code = generate_ts_code(weekly_result)
+        with open(target_path, 'w', encoding='utf-8') as f:
+            f.write(ts_code)
+        print(f"💾 Respaldo offline estático actualizado en: {target_path}")
+        return True
+    except Exception as e:
+        print(f"⚠️ Error al actualizar archivo de respaldo offline: {e}")
+        return False
+
 def publish_to_wod_tv(weekly_result, admin_email, admin_password):
     """
     Inicia sesión con la cuenta de Administrador de WOD-TV,
@@ -494,6 +530,7 @@ def main():
     parser.add_argument("--target-week", choices=["current", "next"], default="current")
     parser.add_argument("--dry-run", action="store_true", default=False, help="Solo extraer y guardar localmente sin publicar a Firebase")
     parser.add_argument("--publish", action="store_true", default=False, help="Publicar el resultado directamente a Firebase usando credenciales de WOD-TV")
+    parser.add_argument("--update-offline", action="store_true", default=False, help="Actualizar archivo estático wods.data.ts")
     parser.add_argument("--screenshots-dir", default="artifacts/screenshots")
 
     args = parser.parse_args()
@@ -512,6 +549,9 @@ def main():
         publish_firebase=args.publish,
         screenshots_dir=args.screenshots_dir
     )
+
+    if args.publish or args.update_offline:
+        update_offline_wods_file(weekly_result)
 
     if args.publish:
         admin_mail = args.admin_email or os.environ.get("WOD_TV_ADMIN_EMAIL")
