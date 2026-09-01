@@ -17,9 +17,9 @@ on:
         default: false
         type: boolean
 
-  # Sincronización automática periódica (Descomentar cuando las pruebas iniciales sean satisfactorias):
-  # schedule:
-  #   - cron: '0 23 * * 0' # Todos los domingos a las 23:00 UTC (19:00 Hora Bolivia)
+  # Sincronización automática periódica (Todos los domingos a las 23:00 UTC = 19:00 Hora Bolivia):
+  schedule:
+    - cron: '0 23 * * 0'
 
 permissions:
   contents: read
@@ -53,17 +53,20 @@ jobs:
         env:
           CROSSHERO_EMAIL: ${{ secrets.CROSSHERO_EMAIL }}
           CROSSHERO_PASSWORD: ${{ secrets.CROSSHERO_PASSWORD }}
+          WOD_TV_ADMIN_EMAIL: ${{ secrets.WOD_TV_ADMIN_EMAIL }}
+          WOD_TV_ADMIN_PASSWORD: ${{ secrets.WOD_TV_ADMIN_PASSWORD }}
           FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL || 'https://crosssfit--3640-tv-default-rtdb.firebaseio.com' }}
-          FIREBASE_AUTH_TOKEN: ${{ secrets.FIREBASE_AUTH_TOKEN }}
         run: |
-          PUBLISH_FLAG="--dry-run"
-          if [ "${{ github.event.inputs.publish_to_firebase }}" = "true" ]; then
+          # Si se ejecuta automáticamente por cron los domingos: publicar semana siguiente
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            TARGET_WEEK="next"
             PUBLISH_FLAG="--publish"
-          fi
-
-          TARGET_WEEK="${{ github.event.inputs.target_week }}"
-          if [ -z "$TARGET_WEEK" ]; then
-            TARGET_WEEK="current"
+          else
+            TARGET_WEEK="${{ github.event.inputs.target_week || 'current' }}"
+            PUBLISH_FLAG="--dry-run"
+            if [ "${{ github.event.inputs.publish_to_firebase }}" = "true" ]; then
+              PUBLISH_FLAG="--publish"
+            fi
           fi
 
           echo "🚀 Ejecutando extractor para semana: $TARGET_WEEK con flag: $PUBLISH_FLAG"

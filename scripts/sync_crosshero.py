@@ -311,45 +311,87 @@ def run_sync(email, password, target_week="next", dry_run=True, publish_firebase
     print(f"📁 JSON estructurado guardado en: {output_json_path}")
     print("=" * 65)
 
-    # Si se solicita publicar en Firebase
-    if publish_firebase and not dry_run:
-        import requests
-        firebase_url = os.environ.get("FIREBASE_DATABASE_URL", "https://crosssfit--3640-tv-default-rtdb.firebaseio.com")
-        target_endpoint = f"{firebase_url.rstrip('/')}/weeklyWods.json"
+    return weekly_result
 
-        # Intentar obtener token si hay credenciales de Firebase configuradas
-        auth_param = ""
-        firebase_token = os.environ.get("FIREBASE_AUTH_TOKEN")
-        if firebase_token:
-            auth_param = f"?auth={firebase_token}"
+def publish_to_wod_tv(weekly_result, admin_email, admin_password):
+    """
+    Inicia sesión con la cuenta de Administrador de WOD-TV,
+    publica la rutina en weeklyWods y registra la auditoría.
+    """
+    import requests
 
-        print(f"☁️ Publicando WODs extraídos en Firebase: {target_endpoint}...")
-        resp = requests.put(f"{target_endpoint}{auth_param}", json=weekly_result, timeout=15)
-        if resp.status_code in [200, 201]:
-            print(f"✅ ¡WODS PUBLICADOS EXITOSAMENTE EN FIREBASE! Status: {resp.status_code}")
+    api_key = os.environ.get("FIREBASE_API_KEY", "AIzaSyCC3idHLHcFFcGOAbdJGtuWYsrV0PFf8Oc")
+    db_url = os.environ.get("FIREBASE_DATABASE_URL", "https://crosssfit--3640-tv-default-rtdb.firebaseio.com").rstrip("/")
+
+    print(f"\n🔐 [3/3] Autenticando en WOD-TV como Administrador ({admin_email})...")
+    auth_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
+    auth_payload = {
+        "email": admin_email,
+        "password": admin_password,
+        "returnSecureToken": True
+    }
+
+    try:
+        auth_resp = requests.post(auth_url, json=auth_payload, timeout=15)
+        if auth_resp.status_code != 200:
+            print(f"❌ Error al iniciar sesión en WOD-TV ({auth_resp.status_code}): {auth_resp.text}")
+            return False
+
+        id_token = auth_resp.json().get("idToken")
+        print("✅ Sesión de Super Administrador iniciada correctamente.")
+
+        # 1. Guardar weeklyWods
+        wods_endpoint = f"{db_url}/weeklyWods.json?auth={id_token}"
+        print(f"☁️ Publicando WODs semanales a las pantallas de los televisores...")
+        put_resp = requests.put(wods_endpoint, json=weekly_result, timeout=15)
+
+        if put_resp.status_code in [200, 201]:
+            print("🎉 ¡WODS SEMANALES PUBLICADOS EXITOSAMENTE EN LAS PANTALLAS DEL BOX!")
         else:
-            print(f"⚠️ Error al publicar en Firebase ({resp.status_code}): {resp.text}")
-    else:
-        print("💡 Modo DRY-RUN activo: No se modificó Firebase. Revisa el JSON y capturas para validar.")
+            print(f"❌ Error al guardar WODs en las pantallas ({put_resp.status_code}): {put_resp.text}")
+            return False
+
+        # 2. Registrar en Auditoría (activityLogs) de WOD-TV
+        now = datetime.datetime.now()
+        log_entry = {
+            "timestamp": int(now.timestamp() * 1000),
+            "formattedDate": now.strftime("%d/%m/%Y %H:%M"),
+            "email": admin_email,
+            "action": "Publicación Automática CrossHero",
+            "details": "Agente Autónomo sincronizó los 7 días de la semana con éxito"
+        }
+        log_endpoint = f"{db_url}/activityLogs.json?auth={id_token}"
+        try:
+            requests.post(log_endpoint, json=log_entry, timeout=10)
+            print("📋 Registro de auditoría guardado en el panel de WOD-TV.")
+        except Exception as e:
+            print(f"⚠️ Nota de auditoría: {e}")
+
+        return True
+    except Exception as e:
+        print(f"❌ Error de conexión con WOD-TV: {e}")
+        return False
 
 def main():
     parser = argparse.ArgumentParser(description="Extractor de WODs de CrossHero para WOD-3640-TV")
     parser.add_argument("--email", default=os.environ.get("CROSSHERO_EMAIL"))
     parser.add_argument("--password", default=os.environ.get("CROSSHERO_PASSWORD"))
+    parser.add_argument("--admin-email", default=os.environ.get("WOD_TV_ADMIN_EMAIL"))
+    parser.add_argument("--admin-password", default=os.environ.get("WOD_TV_ADMIN_PASSWORD"))
     parser.add_argument("--target-week", choices=["current", "next"], default="current")
-    parser.add_argument("--dry-run", action="store_true", default=True, help="Solo extraer y guardar localmente sin publicar a Firebase")
-    parser.add_argument("--publish", action="store_true", default=False, help="Publicar el resultado directamente a Firebase")
+    parser.add_argument("--dry-run", action="store_true", default=False, help="Solo extraer y guardar localmente sin publicar a Firebase")
+    parser.add_argument("--publish", action="store_true", default=False, help="Publicar el resultado directamente a Firebase usando credenciales de WOD-TV")
     parser.add_argument("--screenshots-dir", default="artifacts/screenshots")
 
     args = parser.parse_args()
 
     if not args.email or not args.password:
-        print("❌ Error: Debes proporcionar correo y contraseña vía argumentos (--email, --password) o variables de entorno (CROSSHERO_EMAIL, CROSSHERO_PASSWORD).")
+        print("❌ Error: Debes proporcionar correo y contraseña de CrossHero vía argumentos (--email, --password) o variables de entorno (CROSSHERO_EMAIL, CROSSHERO_PASSWORD).")
         sys.exit(1)
 
     is_dry_run = not args.publish
 
-    run_sync(
+    weekly_result = run_sync(
         email=args.email,
         password=args.password,
         target_week=args.target_week,
@@ -357,6 +399,14 @@ def main():
         publish_firebase=args.publish,
         screenshots_dir=args.screenshots_dir
     )
+
+    if args.publish:
+        admin_mail = args.admin_email or os.environ.get("WOD_TV_ADMIN_EMAIL")
+        admin_pass = args.admin_password or os.environ.get("WOD_TV_ADMIN_PASSWORD")
+        if not admin_mail or not admin_pass:
+            print("⚠️ No se proporcionaron las credenciales completas de Administrador de WOD-TV (WOD_TV_ADMIN_EMAIL, WOD_TV_ADMIN_PASSWORD). No se pudo publicar.")
+        else:
+            publish_to_wod_tv(weekly_result, admin_mail, admin_pass)
 
 if __name__ == '__main__':
     main()
