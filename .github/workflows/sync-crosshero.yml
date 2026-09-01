@@ -1,0 +1,85 @@
+name: 🤖 Agente Extractor CrossHero (Pruebas y Sync)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_week:
+        description: 'Semana a extraer de CrossHero'
+        required: true
+        default: 'current'
+        type: choice
+        options:
+          - 'current'
+          - 'next'
+      publish_to_firebase:
+        description: '¿Publicar resultado directamente a Firebase TV en vivo?'
+        required: true
+        default: false
+        type: boolean
+
+  # Sincronización automática periódica (Descomentar cuando las pruebas iniciales sean satisfactorias):
+  # schedule:
+  #   - cron: '0 23 * * 0' # Todos los domingos a las 23:00 UTC (19:00 Hora Bolivia)
+
+permissions:
+  contents: read
+
+jobs:
+  sync_crosshero:
+    name: Extraer WODs desde CrossHero con Playwright
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Instalar dependencias Python
+        run: |
+          pip install --upgrade pip
+          pip install -r scripts/requirements-crosshero.txt
+
+      - name: 🌐 Instalar Playwright Chromium & Dependencias de SO
+        run: |
+          playwright install --with-deps chromium
+
+      - name: 🤖 Ejecutar Agente Extractor de CrossHero
+        env:
+          CROSSHERO_EMAIL: ${{ secrets.CROSSHERO_EMAIL }}
+          CROSSHERO_PASSWORD: ${{ secrets.CROSSHERO_PASSWORD }}
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL || 'https://crosssfit--3640-tv-default-rtdb.firebaseio.com' }}
+          FIREBASE_AUTH_TOKEN: ${{ secrets.FIREBASE_AUTH_TOKEN }}
+        run: |
+          PUBLISH_FLAG="--dry-run"
+          if [ "${{ github.event.inputs.publish_to_firebase }}" = "true" ]; then
+            PUBLISH_FLAG="--publish"
+          fi
+
+          TARGET_WEEK="${{ github.event.inputs.target_week }}"
+          if [ -z "$TARGET_WEEK" ]; then
+            TARGET_WEEK="current"
+          fi
+
+          echo "🚀 Ejecutando extractor para semana: $TARGET_WEEK con flag: $PUBLISH_FLAG"
+          python3 scripts/sync_crosshero.py --target-week "$TARGET_WEEK" $PUBLISH_FLAG
+
+      - name: 📸 Guardar Capturas de Pantalla como Artefacto de Inspección
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crosshero-screenshots
+          path: artifacts/screenshots/
+          retention-days: 7
+
+      - name: 📄 Guardar JSON de WODs Extraídos como Artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extracted-wods-json
+          path: extracted_wods.json
+          retention-days: 7
