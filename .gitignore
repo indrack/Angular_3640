@@ -70,6 +70,15 @@ pip-delete-this-directory.txt
 ._*
 Thumbs.db
 desktop.ini
+.directory
+
+# Agent configuration (local only)
+.agents/
+
+# Scraping & Temporary artifacts
+extracted_wods.json
+artifacts/
+*.zip
 
 # Environment secrets
 src/environments/environment.prod.ts
