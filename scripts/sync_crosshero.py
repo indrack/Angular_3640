@@ -201,12 +201,43 @@ def parse_card_text_to_blocks(raw_text):
 
     return blocks
 
+def dismiss_cookie_banners(page):
+    """
+    Descarta el aviso de cookies presionando 'Rechazar' para evitar telemetría,
+    cookies no esenciales y minimizar el rastro del bot.
+    """
+    try:
+        reject_btn = page.locator('button:has-text("Rechazar"), a:has-text("Rechazar"), input[value="Rechazar"]')
+        if reject_btn.count() > 0 and reject_btn.first.is_visible():
+            reject_btn.first.click()
+            page.wait_for_timeout(400)
+            return
+
+        # Fallback vía DOM si el botón requiere trigger manual
+        page.evaluate("""() => {
+            const buttons = Array.from(document.querySelectorAll('button, a'));
+            for (const b of buttons) {
+                const text = (b.innerText || '').toLowerCase().trim();
+                if (text === 'rechazar' || text.includes('rechazar')) {
+                    b.click();
+                    return;
+                }
+            }
+            // Ocultar cualquier contenedor restante
+            const cookieContainers = document.querySelectorAll('.cookie-consent, #onetrust-banner-sdk, .cc-window, [id*="cookie"], [class*="cookie"], div[class*="consent"]');
+            cookieContainers.forEach(el => el.style.display = 'none');
+        }""")
+        page.wait_for_timeout(300)
+    except Exception:
+        pass
+
 def extract_wod_from_page(page):
     """
     Extrae el texto del panel del WOD en la página de CrossHero classes.
     """
     try:
-        page.wait_for_timeout(1500)
+        dismiss_cookie_banners(page)
+        page.wait_for_timeout(1000)
 
         wod_text = page.evaluate("""() => {
             // 1. Buscar tarjetas que contengan palabras claves de CrossFit
@@ -343,6 +374,7 @@ def run_sync(email, password, target_week="next", dry_run=True, publish_firebase
             url_mira = f"https://crosshero.com/dashboard/classes?date={encoded_date}&program_id={PROGRAM_MIRAFLORES}"
             print(f"   🏢 Consultando Miraflores...")
             page.goto(url_mira, wait_until="networkidle", timeout=25000)
+            dismiss_cookie_banners(page)
 
             day_screenshot = os.path.join(screenshots_dir, f"day_{idx+1}_{day_key}_miraflores.png")
             page.screenshot(path=day_screenshot)
@@ -355,6 +387,7 @@ def run_sync(email, password, target_week="next", dry_run=True, publish_firebase
                 print(f"   ⚠️ Miraflores sin WOD cargado. Consultando Calacoto como respaldo...")
                 url_cala = f"https://crosshero.com/dashboard/classes?date={encoded_date}&program_id={PROGRAM_CALACOTO}"
                 page.goto(url_cala, wait_until="networkidle", timeout=25000)
+                dismiss_cookie_banners(page)
 
                 day_screenshot_cala = os.path.join(screenshots_dir, f"day_{idx+1}_{day_key}_calacoto.png")
                 page.screenshot(path=day_screenshot_cala)
