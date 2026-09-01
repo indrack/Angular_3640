@@ -1,5 +1,95 @@
 import { DayWods, DayName } from '../models/wod.model';
 
+export function cleanWodTitle(title: string): string {
+  if (!title) return '';
+  // Remover "(Tiempo)" o "(tiempo)", pero mantener "(Peso)" u otros especificadores
+  return title.replace(/\s*\([Tt]iempo\)/g, '').trim();
+}
+
+export function formatWodContent(content: string): string {
+  if (!content) return '';
+
+  const rawLines = content.split('\n');
+  const cleanedLines: string[] = [];
+
+  // 1. Deduplicación de 'For time' consecutivos
+  for (const line of rawLines) {
+    const trimmed = line.trim();
+    const isForTime = /^\*?\s*for time:?\s*\*?$/i.test(trimmed);
+    if (isForTime && cleanedLines.length > 0) {
+      const prevTrimmed = cleanedLines[cleanedLines.length - 1].trim();
+      if (/^\*?\s*for time:?\s*\*?$/i.test(prevTrimmed)) {
+        continue;
+      }
+    }
+    cleanedLines.push(line);
+  }
+
+  // Regex para líneas completas que deben ir en *...*
+  const fullLinePatterns = [
+    // Sets y Rounds
+    /^\d+\s*(?:SETS?|ROUNDS?|Rounds?|Sets?)(?:\s*(?:of|for quality of|for time of|each))?:?$/i,
+    /^\d+\s*ROUND\s*EACH$/i,
+    /^EMOM\s*x?\s*[\d:]+.*$/i,
+    /^AMRAP\s*[\d:]+.*$/i,
+    // Tiempos, Clocks y Caps
+    /^(?:For time:?|FOR TIME:?)$/i,
+    /^Time cap:?\s*[\d:]+\s*(?:mins?|min|m|horas?|hrs?)?\.?$/i,
+    /^ON A\s+[\d:]+\s+CLOCK.*$/i,
+    /^Every\s+[\d:]+\s+(?:mins?\s+)?for\s+[\d:]+\s+mins?\.?$/i,
+    /^Rest\s+\d+\s*(?:mins?|min|seg|s)\.?$/i,
+    /^Into\.{2,3}:?$/i,
+    // Equipos y directivas
+    /^(?:IN\s+)?TEAMS?\s+OF\s+\d+.*$/i,
+    /^Complete in teams of \d+\.?$/i,
+    /^Complete as-?$/i,
+    // Instrucciones de coaches
+    /^Athletes have\s+[\d:]+\s+at each station.*$/i,
+    /^All\s+\d+\s+reps unbroken.*$/i
+  ];
+
+  // Patrón para prefijos como Minute 1:, Partner 1:
+  const minutePartnerRegex = /^(\s*(?:Minute|Minuto|Partner|P)\s+\d+:?)(.*)$/i;
+
+  const formattedLines: string[] = [];
+
+  for (const line of cleanedLines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      formattedLines.push(line);
+      continue;
+    }
+
+    // Si ya está envuelta en asteriscos completa, no duplicar
+    if (trimmed.startsWith('*') && trimmed.endsWith('*') && trimmed.length > 2) {
+      formattedLines.push(line);
+      continue;
+    }
+
+    // Verificar prefijo Minute / Partner
+    const mpMatch = minutePartnerRegex.exec(line);
+    if (mpMatch) {
+      const prefix = mpMatch[1];
+      const rest = mpMatch[2];
+      if (!prefix.trim().startsWith('*')) {
+        formattedLines.push(`*${prefix.trim()}*${rest}`);
+        continue;
+      }
+    }
+
+    // Verificar coincidencia con línea completa
+    const matchesFullLine = fullLinePatterns.some(pattern => pattern.test(trimmed));
+    if (matchesFullLine) {
+      const leadingSpaces = line.length - line.trimStart().length;
+      formattedLines.push(`${' '.repeat(leadingSpaces)}*${trimmed}*`);
+    } else {
+      formattedLines.push(line);
+    }
+  }
+
+  return formattedLines.join('\n');
+}
+
 export function parseWeeklyTxt(rawText: string): DayWods {
   const raw = rawText.trim();
   const daysMap: { [key: string]: DayName } = {
@@ -45,7 +135,10 @@ export function parseWeeklyTxt(rawText: string): DayWods {
         const trimmed = line.trim();
         if (headerRegex.test(trimmed)) {
           if (curTitle !== null) {
-            newWeeklyData[dayKey].push({ titulo: curTitle, contenido: curLines.join('\n').trim() });
+            newWeeklyData[dayKey].push({
+              titulo: cleanWodTitle(curTitle),
+              contenido: formatWodContent(curLines.join('\n').trim())
+            });
             curLines = [];
           }
           curTitle = trimmed;
@@ -60,7 +153,10 @@ export function parseWeeklyTxt(rawText: string): DayWods {
       }
 
       if (curTitle !== null) {
-        newWeeklyData[dayKey].push({ titulo: curTitle, contenido: curLines.join('\n').trim() });
+        newWeeklyData[dayKey].push({
+          titulo: cleanWodTitle(curTitle),
+          contenido: formatWodContent(curLines.join('\n').trim())
+        });
       }
     }
     return newWeeklyData;

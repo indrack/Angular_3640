@@ -70,6 +70,86 @@ def get_target_week_dates(target_week="next"):
 
     return week_dates
 
+def clean_title(title):
+    if not title:
+        return title
+    # Quitar "(Tiempo)" o "(tiempo)" pero conservar "(Peso)" u otros
+    return re.sub(r'\s*\([Tt]iempo\)', '', title).strip()
+
+def format_wod_content(content):
+    if not content:
+        return content
+
+    raw_lines = content.split('\n')
+    cleaned_lines = []
+
+    # 1. Deduplicación de 'For time' consecutivos
+    for line in raw_lines:
+        trimmed = line.strip()
+        is_for_time = bool(re.match(r'^\*?\s*for time:?\s*\*?$', trimmed, re.IGNORECASE))
+        if is_for_time and cleaned_lines:
+            prev_trimmed = cleaned_lines[-1].strip()
+            if re.match(r'^\*?\s*for time:?\s*\*?$', prev_trimmed, re.IGNORECASE):
+                continue
+        cleaned_lines.append(line)
+
+    # Regex para líneas completas que deben ir en *...*
+    full_line_patterns = [
+        # Sets y Rounds
+        r'^\d+\s*(?:SETS?|ROUNDS?|Rounds?|Sets?)(?:\s*(?:of|for quality of|for time of|each))?:?$',
+        r'^\d+\s*ROUND\s*EACH$',
+        r'^EMOM\s*x?\s*[\d:]+.*$',
+        r'^AMRAP\s*[\d:]+.*$',
+        # Tiempos, Clocks y Caps
+        r'^(?:For time:?|FOR TIME:?)$',
+        r'^Time cap:?\s*[\d:]+\s*(?:mins?|min|m|horas?|hrs?)?\.?$',
+        r'^ON A\s+[\d:]+\s+CLOCK.*$',
+        r'^Every\s+[\d:]+\s+(?:mins?\s+)?for\s+[\d:]+\s+mins?\.?$',
+        r'^Rest\s+\d+\s*(?:mins?|min|seg|s)\.?$',
+        r'^Into\.{2,3}:?$',
+        # Equipos y directivas
+        r'^(?:IN\s+)?TEAMS?\s+OF\s+\d+.*$',
+        r'^Complete in teams of \d+\.?$',
+        r'^Complete as-?$',
+        # Instrucciones de coaches
+        r'^Athletes have\s+[\d:]+\s+at each station.*$',
+        r'^All\s+\d+\s+reps unbroken.*$'
+    ]
+    full_line_regex = re.compile('|'.join(f'(?:{p})' for p in full_line_patterns), re.IGNORECASE)
+
+    # Prefix patterns: Minute 1:, Partner 1:
+    minute_partner_regex = re.compile(r'^(\s*(?:Minute|Minuto|Partner|P)\s+\d+:?)(.*)$', re.IGNORECASE)
+
+    formatted_lines = []
+
+    for line in cleaned_lines:
+        trimmed = line.strip()
+        if not trimmed:
+            formatted_lines.append(line)
+            continue
+
+        # Si ya está completamente envuelto en asteriscos, no tocar
+        if trimmed.startswith('*') and trimmed.endswith('*') and len(trimmed) > 2:
+            formatted_lines.append(line)
+            continue
+
+        # Verificar si coincide con patrón de prefijo (Minute 1:, Partner 1:)
+        mp_match = minute_partner_regex.match(line)
+        if mp_match:
+            prefix, rest = mp_match.groups()
+            if not prefix.strip().startswith('*'):
+                formatted_lines.append(f"*{prefix.strip()}*{rest}")
+                continue
+
+        # Verificar si coincide con patrón de línea completa
+        if full_line_regex.match(trimmed):
+            leading_spaces = len(line) - len(line.lstrip())
+            formatted_lines.append(f"{' ' * leading_spaces}*{trimmed}*")
+        else:
+            formatted_lines.append(line)
+
+    return '\n'.join(formatted_lines)
+
 def parse_card_text_to_blocks(raw_text):
     """
     Convierte el texto de la tarjeta de WOD de CrossHero en una lista de bloques:
@@ -100,8 +180,8 @@ def parse_card_text_to_blocks(raw_text):
         if header_regex.match(trimmed):
             if current_title:
                 blocks.append({
-                    'titulo': current_title,
-                    'contenido': '\n'.join(current_lines).strip()
+                    'titulo': clean_title(current_title),
+                    'contenido': format_wod_content('\n'.join(current_lines).strip())
                 })
                 current_lines = []
             current_title = trimmed
@@ -115,8 +195,8 @@ def parse_card_text_to_blocks(raw_text):
 
     if current_title and current_lines:
         blocks.append({
-            'titulo': current_title,
-            'contenido': '\n'.join(current_lines).strip()
+            'titulo': clean_title(current_title),
+            'contenido': format_wod_content('\n'.join(current_lines).strip())
         })
 
     return blocks
