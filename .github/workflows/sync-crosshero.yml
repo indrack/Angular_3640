@@ -19,7 +19,7 @@ on:
 
   # Sincronización automática periódica (Todos los domingos a las 23:00 UTC = 19:00 Hora Bolivia):
   schedule:
-    - cron: '0 23 * * 0'
+    - cron: '44 16 * * 0'
 
 permissions:
   contents: write
