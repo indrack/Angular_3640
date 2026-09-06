@@ -17,9 +17,9 @@ on:
         default: false
         type: boolean
 
-  # Sincronización automática periódica (Todos los domingos a las 23:00 UTC = 19:00 Hora Bolivia):
+  # Sincronización automática periódica (Todos los domingos a las 17:00 UTC = 13:00 Hora Bolivia):
   schedule:
-    - cron: '44 16 * * 0'
+    - cron: '0 17 * * 0'
 
 permissions:
   contents: write
