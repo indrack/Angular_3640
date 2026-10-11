@@ -4,201 +4,182 @@ export const WODS_DATA: DayWods = {
   domingo: [
     {
       titulo: 'Warmup',
-      contenido: `EVERY 1:00 x 10:00
-ROUND 1 — Easy
-MIN 1 → :40 Easy Shuttle Run
-MIN 2 → :40 Hand Release Push Ups
-MIN 3 → :40 Single Unders → Crossover Singles
-MIN 4 → :40 Light Russian KB Swings
-MIN 5 → :40 Elbow Knee Plank`
+      contenido: `*3 Rounds*
+1min Jump Rope
+10 Leg Swings (each)
+5 Sit-Ups
+Annie
+50-40-30-20-10 Reps For Time
+Double-Unders
+Sit-Ups`
     },
     {
-      titulo: 'Custom Metcon (Reps)',
-      contenido: `Every 1 min for 30 mins, alternating between:
-max rep Shuttle Runs, 25 ft, 50 secs
-max rep Dumbbell Bench Press, 22.5/15, 50 secs
-max rep Crossover Single Unders, 50 secs
-max rep Russian Kettlebell Swings, 32/24, 50 secs
-Elbow Plank Hold, 50 secs`
-    },
-    {
-      titulo: 'Accesorio (Peso)',
-      contenido: `10-10-10-10-10
-Weighted Box Step-up 20"
-Use the heaviest weight you can for each set.
-Rest 1 min between sets.`
+      titulo: 'Skill',
+      contenido: `*ON A 8:00 CLOCK...*
+Turkish Get-Ups Practice
+*Start light and practice the skill as you build up on each arm, 1 rep on each side. No max loads today, just get solid reps.`
     },
   ],
   lunes: [
     {
       titulo: 'Warmup',
-      contenido: `2 SETS (Empty Barbell)
-8 Alternating Low Box Step Ups
-8 Alternating Reverse Lunges
-8 Banded Good Mornings
-8 PVC Pass Throughs
-5 Hang Power Cleans
-5 Strict Press`
+      contenido: `*2 ROUNDS*
+10 Glute Bridges
+10 Banded Good Mornings
+10 Hollow Rocks
+10 Scap Pull Ups
+10 World’s Greatest Stretch (5/side)
+5 Empty Bar Deadlifts`
     },
     {
-      titulo: 'Weightlifting (Clean and Jerk)',
-      contenido: `*Complete as-*
-EVERY 1:00 (5:00)
-5 Power Clean and Jerk (light)
--straight into-
-EVERY 1:00 (5:00)
-3 Power Clean and Jerk (moderate)
--straight into-
-EVERY :30 (5:00)
-1 Power Clean and Jerk (heavy)
-*Note -- All reps for all lifts today are meant to be 'touch and go'. Default for the Jerk is Push Jerk (Split Jerk can be used if athlete is accustomed).`
+      titulo: 'Weightlifting (Deadlift)',
+      contenido: `Deadlift 10-10-10
+Use the heaviest weight you can for each set.
+Rest as needed between sets.`
     },
     {
-      titulo: 'Custom Metcon (Reps)',
-      contenido: `October Monthly Challenge
-As many reps in 15 mins as you can of:
-Box Step-Up, 20 in
-If you are planning to use a weighted vest/ruck for Chad, you should use that weight today.`
+      titulo: 'Custom Metcon',
+      contenido: `*EMOM 20*
+1. 15 Toes-to-bars
+2. 15/12 Row Calories
+3. 5 Deadlifts 102/70
+4. Rest`
     },
   ],
   martes: [
     {
       titulo: 'Warmup',
-      contenido: `4:00 AMRAP
+      contenido: `*2 ROUND*
 10 Air Squats
-8 Alternating Cossack Squats
-8 Scap Pull-Ups
-8 Hollow Rocks`
+10 Banded Pass Throughs
+10 Banded Pull Aparts
+10 Alternating Samson Lunges
+10 World’s Greatest Stretch (5/5)`
     },
     {
-      titulo: 'Gymnastics (Bar Muscle-up)',
-      contenido: `ON AN 8:00 CLOCK...
-Kip Swing + Bar Muscle Transition Work
-Freedom (Advanced) - Ring Muscle-Ups or Kip Swing + High Box Bar Muscle Up Transition
-Independence (Intermediate) - Kip Swing + Low Bar Muscle Up
-Liberty (Beginner) - Low Bar Muscle Up Transition
-*Build off of 9/24 BMU session`
+      titulo: 'Weightlifting (Muscle Clean)',
+      contenido: `Complex: Muscle Cleans and Strict Press : 1-1-1-1-1
+1x [ 10 Muscle Cleans + 10 Strict Press ]
+1x [ 8 Muscle Cleans + 8 Strict Press ]
+1x [ 6 Muscle Cleans + 6 Strict Press ]
+1x [ 4 Muscle Cleans + 4 Strict Press ]
+1x [ 2 Muscle Cleans + 2 Strict Press ]
+Unbroken.
+Use the heaviest weight you can for each set.
+Rest as needed between sets.`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `Jason
-*For time:*
-100 Air Squats
-5 Muscle-ups
-75 Air Squats
-10 Muscle-ups
-50 Air Squats
-15 Muscle-ups
-25 Air Squats
-20 Muscle-ups`
+      contenido: `*For time:*
+30 Power Clean & Jerks, 85/57.5
+*Time cap: 12 mins*`
     },
   ],
   miercoles: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-20 Single Unders
-10 Banded Pull Aparts
-10 Scap Push Ups
-10 Tempo Push Ups (:02 down)
-5 Burpee to Bar
-5 Empty Bar Deadstop Bench Press (3-second Pause)`
+20m High Knees
+20m Butt Kicks
+20m Tip Toe Walk
+10 Alternating Samson Lunges
+10 Scap Push Ups`
     },
     {
-      titulo: 'Weightlifting (Bench Press)',
-      contenido: `Dead Stop Bench Press 3-3-3-3-3
-Use the heaviest weight you can for each set.
-Rest 1:30 between sets.
-3-second Pause`
+      titulo: 'Gymnastics (Handstand Walk)',
+      contenido: `10:00 PRACTICE / SKILL DEVELOPMENT
+Handstand Walk, Handstand Hold, & Overhead Stability Work
+Freedom (Advanced) - Handstand Walk or Freestanding Handstand Hold
+Independence (Intermediate) - Kick-Ups/Box Pike Walk
+Liberty (Beginner) - Bear Crawl/Wall Walk`
     },
     {
-      titulo: 'Custom Metcon (Reps)',
-      contenido: `3 rounds, 3 mins each, for max reps of:
-75 Double Unders
-20 Burpee-to-Targets
-max reps in remaining time 50 ft Shuttle Run
-*Rest 1 min*
--- then --
-In 4 mins, for max reps of:
-75 Double Unders
-20 Burpee-to-Targets
-max reps in remaining time 50 ft Shuttle Run`
+      titulo: 'Custom Metcon',
+      contenido: `*EMOM 24*
+1. Max  50 ft Shuttle Run
+2. 50 Double Unders
+3. 5 Wall Walks
+4. Rest`
     },
   ],
   jueves: [
     {
       titulo: 'Warmup',
       contenido: `*3 ROUNDS*
-10 Glute Bridges
-8 Dead Bugs
-10 Empty-Bar Good Mornings
-8 Empty-Bar Romanian Deadlifts
-8 Hang Muscle Snatches
-8 Hang Power Snatches`
+30-second Any Cardio
+10 Roll and Reach
+10 Deadbugs
+10 Kip Swings
+3 Inchworms`
     },
     {
-      titulo: 'Weightlifting (Deadlift)',
-      contenido: `Deadlift 12-12-12
-Use the heaviest weight you can for each set.
-Rest as needed between sets.
-Start Mod-Heavy/Heavy and Build to a 12-Rep Max`
+      titulo: 'Weightlifting (Power Snatch)',
+      contenido: `Every 1 min for 8 mins: Power Snatch
+2 Power Snatches, pick load
+*Every 1 min for 8 mins.*
+Singles`
     },
     {
       titulo: 'Custom Metcon (Rondas)',
       contenido: `Complete as many rounds as possible in 9 mins of:
-15 Sit-ups
-10 Deadlifts, 52.5/35
-5 Hang Power Snatches, 52.5/35`
+12 Power Snatches, 35/25
+4 Burpee Pull-ups`
     },
   ],
   viernes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-100m Easy Run
-20m High Knees
-20m Butt Kicks
-10 Alternating Samson Lunges
-10 Cossack Squats
-10 Air Squats
-Kelly
-5 Rounds For Time
-400 Meter Run
-30 Box Jumps (20/14 in)
-30 Wall Ball Shots (20/14 lb)`
+10 Glute Bridges
+10 Banded Lateral Steps / Side
+8 Alternating Samson Lunges
+10 Dead Bugs
+10 Air Squats`
     },
     {
-      titulo: 'Accesorio',
-      contenido: `For quality:
-Dead Hang, 3 mins
-Accumulate 3:00 of Dead hang Hold From the Pull-Up Bar or Rings`
+      titulo: 'Weightlifting (Front Squat)',
+      contenido: `Front Squat 8x2
+Use the heaviest weight you can for each set.
+Rest 1 min between sets.`
+    },
+    {
+      titulo: 'Custom Metcon',
+      contenido: `5 rounds, each round for time, of:
+8 Front Squats, 60/42.5
+16 Box Step Overs, 24/20 in
+8 Front Squats, 60/42.5
+Go every 3:30 mins.`
     },
   ],
   sabado: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-10 PVC Pass Throughs
-10 Scap Pull Ups
-10 Hollow Rocks
-10 Arch Rocks
-10 Empty-Bar Good Mornings
-8 Empty-Bar Romanian Deadlifts`
-    },
-    {
-      titulo: 'Gymnastics (Toes-to-Bar)',
-      contenido: `Every 1 min for 5 mins do:
-5 Toes-to-bars
-4 Pull-ups
-3 Chest-to-bar Pull-ups
-Adjust reps as needed to complete each complex unbroken.`
+      contenido: `EVERY 1:00 FOR 10:00
+MIN 1 → :45 Easy Row
+MIN 2 → 10 Air Squats + 10 Alt. Reverse Lunges
+MIN 3 → 5 Scap Pull Ups + 15 sec Dead Hang
+MIN 4 → 10 Bird Dogs (5/side) + 10 Glute Bridges
+MIN 5 → 5 PVC Good Mornings + 5 Inchworm Push-ups
+Repeat for minutes 6-10`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `As Many Rounds as Possible (AMRAP) in 25 minutes
-10 Chest-to-Bar Pull-Ups
-2 Deadlifts (143 / 93)
-10 Toes-to-bars`
+      contenido: `*EMOM 20*
+1. 15/12  Row Calories
+2. 20 V-ups
+3. Max Bench Press, 70/47.5
+4. Rest`
+    },
+    {
+      titulo: 'Accesorio',
+      contenido: ``
+    },
+    {
+      titulo: 'OPTIONAL ACCESSORY',
+      contenido: `*3 rounds for quality of:*
+10 Goblet Spanish Squats, RPE 7
+15 Dumbbell Hip Thrusts, RPE 7
+*Rest 1 min*`
     },
   ],
 };
