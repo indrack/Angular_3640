@@ -5,6 +5,7 @@ import { WodItem, ActiveMode, DayName, DayWods } from '../models/wod.model';
 import { WODS_DATA } from '../data/wods.data';
 import { WGIRLS_DATA } from '../data/wgirls.data';
 import { FIREBASE_CONFIG } from '../config/firebase.config';
+import { isClassStartTime, ClassScheduleConfig } from '../config/class-schedule.config';
 import { ClockService } from './clock.service';
 
 const DAY_NAMES: DayName[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
@@ -23,10 +24,12 @@ export class WodService {
   public firebaseCalacoto = signal<WodItem[]>([]);
   public firebaseWeeklyWods = signal<DayWods | null>(null);
   public firebaseWeeklyWodsWGirls = signal<DayWods | null>(null);
+  public firebaseClassSchedule = signal<ClassScheduleConfig | null>(null);
   public cachedDailyWod = signal<WodItem[] | null>(null);
   public isConnected = signal<boolean>(true);
 
   private db: Database | null = null;
+  private lastResetSlot = '';
 
   constructor() {
     this.loadDailyWodFromCache();
@@ -40,9 +43,30 @@ export class WodService {
         this.saveDailyWodToCache(parts);
       }
     });
+
+    // Auto-retorno al primer slide (Warm-up) al inicio de cada clase
+    effect(() => {
+      const timeStr = this.clockService.currentTime();
+      if (!timeStr || timeStr === '--:--:--') return;
+
+      const currentHHMM = timeStr.slice(0, 5);
+      const currentDay = this.clockService.currentDayIndex();
+      const dateStr = this.clockService.currentDate();
+      const currentSlot = `${dateStr} ${currentHHMM}`;
+
+      if (currentSlot === this.lastResetSlot) {
+        return;
+      }
+
+      if (this.isClassTime(currentDay, currentHHMM)) {
+        this.lastResetSlot = currentSlot;
+        this.autoResetToWarmupSlide();
+      }
+    });
   }
 
   private loadDailyWodFromCache(): void {
+    if (typeof localStorage === 'undefined') return;
     try {
       const cachedStr = localStorage.getItem('cached_daily_wod');
       if (cachedStr) {
@@ -57,6 +81,7 @@ export class WodService {
   }
 
   private saveDailyWodToCache(parts: WodItem[]): void {
+    if (typeof localStorage === 'undefined') return;
     try {
       // Ignorar pantallas de carga/espera para no sobrescribir el respaldo con mensajes vacíos
       if (parts.length === 1 && (parts[0].contenido?.includes('Esperando WOD') || parts[0].titulo?.includes('DESCANSO'))) {
@@ -106,8 +131,44 @@ export class WodService {
           this.firebaseWeeklyWodsWGirls.set(val);
         }
       });
+
+      onValue(ref(this.db, 'classSchedule'), (snapshot) => {
+        const val = snapshot.val();
+        if (val && typeof val === 'object') {
+          this.firebaseClassSchedule.set(val as ClassScheduleConfig);
+        }
+      });
     } catch (e) {
       console.warn('Firebase connection unavailable or using offline mode');
+    }
+  }
+
+  public isClassTime(dayOfWeek: number, timeHHMM: string): boolean {
+    const customSchedule = this.firebaseClassSchedule();
+    if (customSchedule && customSchedule[dayOfWeek] && Array.isArray(customSchedule[dayOfWeek])) {
+      return customSchedule[dayOfWeek].includes(timeHHMM);
+    }
+    return isClassStartTime(dayOfWeek, timeHHMM);
+  }
+
+  /**
+   * Retorna automáticamente al primer slide (Warm-up) al iniciar una clase.
+   * NO afecta a los WODs especiales de TV Miraflores ni TV Calacoto (teclas 7 u 8).
+   */
+  public autoResetToWarmupSlide(): void {
+    // Si la TV está mostrando un WOD especial (Miraflores, Calacoto o WGirls), NO intervenir
+    if (this.activeMode() !== null) {
+      return;
+    }
+
+    // Si la vista completa modal está abierta, cerrarla
+    if (this.isFullViewMode()) {
+      this.isFullViewMode.set(false);
+    }
+
+    // Volver al primer slide (índice 0 = Warm-up)
+    if (this.currentSlideIndex() !== 0) {
+      this.goToSlide(0);
     }
   }
 

@@ -45,15 +45,15 @@ Strength (Deadlift)
 5x5 Deadlift 120/80 kg`;
 
     const result = parseWeeklyTxt(raw);
-    expect(result.lunes.length).toBe(3);
-    expect(result.lunes[0].titulo).toBe('Warmup');
-    expect(result.lunes[0].contenido).toContain('*3 Sets*');
-    expect(result.lunes[1].titulo).toBe('Gymnastics (Ring Dip)');
-    expect(result.lunes[2].titulo).toBe('Custom Metcon');
-    expect(result.lunes[2].contenido).toContain('*For time:*');
-    expect(result.lunes[2].contenido).toContain('*Time cap: 15 mins*');
-    expect(result.martes.length).toBe(1);
-    expect(result.martes[0].titulo).toBe('Strength (Deadlift)');
+    expect(result['lunes'].length).toBe(3);
+    expect(result['lunes'][0].titulo).toBe('Warmup');
+    expect(result['lunes'][0].contenido).toContain('*3 Sets*');
+    expect(result['lunes'][1].titulo).toBe('Gymnastics (Ring Dip)');
+    expect(result['lunes'][2].titulo).toBe('Custom Metcon');
+    expect(result['lunes'][2].contenido).toContain('*For time:*');
+    expect(result['lunes'][2].contenido).toContain('*Time cap: 15 mins*');
+    expect(result['martes'].length).toBe(1);
+    expect(result['martes'][0].titulo).toBe('Strength (Deadlift)');
   });
 
   it('should throw error when day separators are missing', () => {

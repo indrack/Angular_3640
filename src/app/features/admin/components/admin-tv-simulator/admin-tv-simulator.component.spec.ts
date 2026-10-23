@@ -1,6 +1,6 @@
 import '@angular/compiler';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createEnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
+import { createEnvironmentInjector, runInInjectionContext, signal, EnvironmentInjector, Injector } from '@angular/core';
 import { AdminTvSimulatorComponent } from './admin-tv-simulator.component';
 import { WodService } from '../../../../core/services/wod.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
@@ -32,7 +32,7 @@ describe('AdminTvSimulatorComponent', () => {
       { provide: WodService, useValue: mockWodService },
       { provide: CelebrationService, useValue: mockCelebrationService },
       { provide: ClockService, useValue: mockClockService }
-    ]);
+    ], Injector.NULL as unknown as EnvironmentInjector);
 
     component = runInInjectionContext(injector, () => new AdminTvSimulatorComponent());
     component.slides = [
@@ -51,25 +51,26 @@ describe('AdminTvSimulatorComponent', () => {
     expect(component.hasNext()).toBe(true);
   });
 
-  it('should navigate forward and backward between slides', () => {
+  it('should advance slide on nextSlide and navigate back on prevSlide', () => {
     component.nextSlide();
     expect(component.currentSlideIndex()).toBe(1);
     expect(component.currentSlide().titulo).toBe('METCON');
-    expect(component.hasPrev()).toBe(true);
     expect(component.hasNext()).toBe(false);
+    expect(component.hasPrev()).toBe(true);
 
     component.prevSlide();
     expect(component.currentSlideIndex()).toBe(0);
     expect(component.currentSlide().titulo).toBe('WARM-UP');
   });
 
-  it('should format markdown and regex highlights correctly', () => {
-    const formatted = component.formatMarkdownText(component.currentSlide().contenido);
+  it('should format text properly with markdown highlights', () => {
+    const raw = '*3 SETS* de 60/42.5 kg';
+    const formatted = component.formatMarkdownText(raw);
     expect(formatted).toContain('<strong>3 SETS</strong>');
-    expect(formatted).toContain('class="highlight-weight"');
+    expect(formatted).toContain('<span class="highlight-weight">60/42.5 kg</span>');
   });
 
-  it('should handle orientation toggle', () => {
+  it('should toggle orientation mode', () => {
     expect(component.orientationMode()).toBe('vertical');
     component.toggleOrientation();
     expect(component.orientationMode()).toBe('horizontal');
