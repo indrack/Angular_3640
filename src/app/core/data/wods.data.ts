@@ -5,62 +5,53 @@ export const WODS_DATA: DayWods = {
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-:30 Easy Cardio
-8 Scap Push-Ups
-8 Alternating Plank Shoulder Taps/Side
-6 Down Dog to Push-Up
-10 Jump Air Squats (Squeeze the hips, extend violently)
-3 Inchworms
-10-second Handstand Hold`
-    },
-    {
-      titulo: 'Gymnastics (Handstand Walk)',
-      contenido: `10:00 PRACTICE / SKILL DEVELOPMENT
-Handstand Kick Up - Handstand Hold - Handstand Negative
-Freedom (Advanced) - Freestanding Handstand Push Up
-Independence (Intermediate) - Kick-Ups + Slow Negative + Kip
-Liberty (Beginner) - Pike Handstand Push Ups/ Box Handstand Push Up`
+8 Deadbugs
+8 Scap Pull-Ups
+8 Kip Swings
+8 PVC Pass-Throughs
+8 PVC Overhead Squats
+8 PVC Muscle Snatches`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*For time:*
-21-15-9
-Power Cleans, 42.5/30
-Handstand Push-ups
-*Rest 3 mins*
-15-12-9
-Power Cleans, 42.5/30
-Handstand Push-ups`
+      contenido: `*10 rounds for time of:*
+5x50ft Shuttle Run
+10 Toes-to-bars
+10 Overhead Squats, 42.5/30`
+    },
+    {
+      titulo: 'Accesorio',
+      contenido: `*4 rounds for quality of:*
+20 Landmine Press, RPE 7
+20 Landmine Twists, RPE 7
+20 Landmine Romanian Deadlifts, RPE 7
+10 reps/side for each movement`
     },
   ],
   lunes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-10 Lateral Band Walks (each way)
-10 Glute Bridges
 10 Air Squats
-5 Slow Kang Squats
-5 Broad Jumps`
+10 PVC Good Mornings
+10 PVC Pass-Throughs
+5 Inchworms`
     },
     {
-      titulo: 'Weightlifting (Back Squat)',
-      contenido: `4 Back Squats, RPE 7
-*Every 1 min for 6 mins.*`
+      titulo: 'Weightlifting (Power Clean)',
+      contenido: `1x [ 3 Power Cleans + 3 Front Squats + 3 Push Jerks ], RPE 7-8
+*Every 1 min for 15 mins.*
+Use the same weight across sets`
     },
     {
-      titulo: 'Custom Metcon',
-      contenido: `*For time:*
-50 Wall Balls, 20/14 lbs
-50 Push-ups
-40 Wall Balls, 20/14 lbs
-40 Push-ups
-30 Wall Balls, 20/14 lbs
-30 Push-ups
-20 Wall Balls, 20/14 lbs
-20 Push-ups
-10 Wall Balls, 20/14 lbs
-10 Push-ups`
+      titulo: 'Custom Metcon (Rondas y Reps)',
+      contenido: `AMRAP in 15 minutes
+4 Cycles of 3 Minutes Each
+3 Power Cleans (135/95 lbs)
+6 Push-Ups
+9 Air Squats
+Rest 1 Minute Between Each 3-Minute Cycle
+Complete as many rounds as possible (AMRAP) in 3 minutes, then rest 1 minute. Start each 3-minute cycle where you left off on the previous cycle. Repeat for a total of 4 cycles. Count total rounds and reps completed.`
     },
   ],
   martes: [
@@ -68,124 +59,133 @@ Handstand Push-ups`
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
 10 Glute Bridges
-10 Dead Bugs
-10 Banded Good Mornings
-5 Romanian Deadlifts
-5 Deadlifts`
-    },
-    {
-      titulo: 'Weightlifting (Deadlift)',
-      contenido: `Deadlift 8-8-8
-Use the heaviest weight you can for each set.
-Rest as needed between sets.`
+10 Hollow Rocks
+10 Walking Lunges (bodyweight)`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*EMOM 24*
-1. 220/200 m Row
-2. 8 Deadlifts, 102.5/70
-3. 220/200 m Row
-4. 10 Toes-to-bars`
+      contenido: `*3 rounds for time of:*
+30 V-Ups
+100 ft Medicine Ball Walking Lunge, 20/14 lbs
+30 Medicine Ball Box Step Overs, 20/14 lbs, 20 in`
+    },
+    {
+      titulo: 'Skill',
+      contenido: `As many reps as possible in 5 mins of:
+1 Wall Walk
+1 Strict Chest-to-bar Pull-up
+2 Wall Walks
+2 Strict Chest-to-bar Pull-ups
+3 Wall Walks
+3 Strict Chest-to-bar Pull-ups
+...
+Continue adding 1 rep each round to each movement until time expires.`
     },
   ],
   miercoles: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-1:00 Jump Rope
-10 Box Step Ups
-10 Scap Pull-Ups
-5 Ring Rows
-2 Seated J-Hooks on the rope`
+10 Kettlebell Deadlifts
+10 Hollow Rocks
+10 Banded Pull-Aparts
+20m High Knees`
     },
     {
-      titulo: 'Gymnastics (Rope Climb)',
-      contenido: `*ON A 8:00 CLOCK...*
-Rope Climb Practice
-Freedom (Advanced) - Rope Climb Practice (Jump + Foot Lock+ Descent)
-Independence (Intermediate) - Rope Climb Practice (Jump + Foot Lock)
-Liberty (Beginner) - Zombie Rope Climbs/Foot Clamp and Stand`
+      titulo: 'Weightlifting (Deadlift)',
+      contenido: `Deadlift 6-6-6
+Use the heaviest weight you can for each set.
+Rest as needed between sets.`
     },
     {
-      titulo: 'Custom Metcon (Reps)',
-      contenido: `5 rounds for max reps of:
-max rep Double Under, 3 mins
-max rep Box Step-ups, 20 in, 2 mins
-max rep Rope Climbs/ Strict Pull-ups, 1 min
--No Additional Rest b/t Sets-`
+      titulo: 'Custom Metcon',
+      contenido: `Helen
+*3 rounds for time of:*
+400 m Run
+21 Kettlebell Swings, 24/16
+12 Pull-ups`
     },
   ],
   jueves: [
     {
       titulo: 'Warmup',
-      contenido: `*2 Rounds*
-1 MIN Easy-Moderate Cardio Choice
-5 Up Downs
-10 Alternating V Ups
-10 AbMat Sit-Ups`
+      contenido: `*2 ROUNDS*
+:45 Easy Row
+8 Alternating Samson Lunges
+8 Air Squats
+8 Scap Push-Ups
+6 Hand Release Push-Ups`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*5 rounds for time of:*
-20 V-Ups
-20 Burpees`
+      contenido: `*EMOM 18*
+1. 15/12 Row Calories
+2. 10 Thrusters, 42.5/30
+3. Rest`
     },
     {
-      titulo: 'Weightlifting (Bench Press)',
-      contenido: `Bench Press 10-10-10-10-10
-Use the heaviest weight you can for each set.
-Rest as needed between sets.`
+      titulo: 'Skill',
+      contenido: `*4 rounds for quality of:*
+8 Strict Press
+12 Hammer Curls
+24 Banded Tricep Extensions
+Rest 1:1
+Strict Press- moderate-heavy
+Hammer Curls- moderate`
     },
   ],
   viernes: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-10 Scap Push-Ups
-10 Alternating Samson Lunges
-20 Line Hops
-10 Glute Bridges
-10 Light Russian Kettlebell Swings
-6 Box Step-Ups`
-    },
-    {
-      titulo: 'Weightlifting (Hang Power Clean)',
-      contenido: `1x [ 4 Hang Power Cleans + 2 Push Jerks ]
-Every 1:30 for 7:30.
-Start Moderate and build to a Moderate-Heavy`
+      contenido: `“ROXANNE” - HALLOWEEN EDITION
+Play “Roxanne” by The Police. (Length: 3:14)
+Every time you hear “Roxanne”: 1 Up Down
+Every time you hear “Red Light”: 1 Air Squat
+Keep this fun, you can cut the music early if needed.
+Then into…
+Warm Up Play Day`
     },
     {
       titulo: 'Custom Metcon (Rondas)',
-      contenido: `Jack
-Complete as many rounds as possible in 20 mins of:
-10 Push Press, 52.5/35
-10 Kettlebell Swings, 24/16
-10 Box Jumps, 24/20 in`
+      contenido: `“NIGHTMARE BEFORE HALLOWEEN”
+Teams 3-4
+WOD 1
+Team Relay
+*AMRAP 8*
+10 Synchro Burpee
+20 Synchro Air Squat
+30 Synchro Jumping Jacks
+-rest 3 min-
+WOD 2
+Max Reps Wall Balls
+Each team accumulate as many wall ball repetitions ass possible in 5 min
+Only one athlete works at time`
     },
   ],
   sabado: [
     {
       titulo: 'Warmup',
-      contenido: `Rowling!
-It’s 5 rounds (each) you vs. your partner.
-Your goal each round is to row and get the monitor to stop on exactly 100m, without slowing your pace.
-Score how many meters you’re over or under each round.
-That’s your penalty burpees while your partner rows (max 10 per round). Example: Row 105m = 5 burpees. Lowest total meters off wins!`
+      contenido: `''GHOSTBUSTERS'' - HALLOWEEN EDITION
+Ghostbusters - Ray Parker jr
+Play Ghostbusters by Ray Parker jr (Length: 3:45)
+Every time you hear “Ghostbusters”: 1 Burpee
+Every time you hear “Ghost”: 1 Air Squat
+Every time you hear “Bustin”: 2 Jumping Jacks
+Keep this fun, you can cut the music early if needed.
+Then into…
+Warm Up Play Day`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*Teams of 3*
-*5 rounds for time of:*
-5 x 50ft Dumbbell Farmers Carry, 32.5/22.5
-50/42 Row Calories
-20 Synchronized Goblet Squats, 32.5/22.5
-Split Farmer Carry and Row reps as needed. Perform the Squats Synchro with your partners.`
-    },
-    {
-      titulo: 'Accesorio',
-      contenido: `*4 rounds for quality of:*
-20 Banded Chest Flies
-20 Banded Rows`
+      contenido: `''TEAM HALLOWEEN''
+*Teams of 2*
+*For Time*
+75 Lateral Pumpkin Burpee
+50 Pumpkin Push Press
+100 Pumpkin Goblet Squat
+75 Pumpkin Slams
+50 Partner Pumpkin Pass
+Use a Slam Balls as your Pumpkin`
     },
   ],
 };
