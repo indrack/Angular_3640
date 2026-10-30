@@ -6,6 +6,9 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch: # Permite ejecución manual desde GitHub Actions tab
 
+permissions:
+  contents: write
+
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -16,14 +19,29 @@ jobs:
       - name: Descargar respaldo de Firebase Realtime Database
         run: |
           mkdir -p backups
-          echo "Realizando copia de seguridad de la base de datos..."
-          curl -s "https://crosssfit--3640-tv-default-rtdb.firebaseio.com/.json" > backups/wod_backup_$(date +'%Y_%m_%d').json
-          echo "Copia de seguridad completada."
+          echo "Realizando copia de seguridad de la rutina semanal..."
+          DATE_STR=$(date +'%Y_%m_%d')
+          FILE="backups/wod_backup_${DATE_STR}.json"
+
+          # Descargar nodo público weeklyWods
+          curl -s "https://crosssfit--3640-tv-default-rtdb.firebaseio.com/weeklyWods.json" > "$FILE"
+
+          # Validar que no contenga error de permisos ni esté vacío
+          if grep -q '"error"' "$FILE" || [ ! -s "$FILE" ]; then
+            echo "❌ Error al obtener respaldo desde Firebase o respuesta con error. Abortando guardado."
+            rm -f "$FILE"
+            exit 1
+          fi
+          echo "✅ Copia de seguridad completada exitosamente en $FILE."
 
       - name: Guardar respaldo en Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add backups/
-          git commit -m "chore(backup): respaldo semanal automático de Firebase Realtime Database" || echo "Sin cambios para commitear"
-          git push || echo "No permissions or no changes"
+          if git diff --staged --quiet; then
+            echo "Sin cambios para commitear."
+          else
+            git commit -m "chore(backup): respaldo semanal automático de rutinas Firebase"
+            git push origin main || echo "No se pudo hacer push (verificar permisos de GitHub Actions)"
+          fi

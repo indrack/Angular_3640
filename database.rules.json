@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "customWodMiraflores": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "customWodCalacoto": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "weeklyWods": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'admincross@gmail.com' || auth.token.email == 'asvins25@gmail.com')"
+    },
+    "weeklyWodsWGirls": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'admincross@gmail.com' || auth.token.email == 'asvins25@gmail.com')"
+    },
+    "celebrationConfig": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email == 'asvins25@gmail.com'"
+    },
+    "classSchedule": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'admincross@gmail.com' || auth.token.email == 'asvins25@gmail.com')"
+    },
+    "activityLogs": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

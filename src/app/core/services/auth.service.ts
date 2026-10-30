@@ -8,6 +8,9 @@ const SUPER_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3'];
 const WEEKLY_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3', '2qCO5Z07nXNkWft4od26Mdw73x42'];
 const CELEBRATION_ADMIN_UIDS: readonly string[] = ['LCjGIWZSlKUfEjBEZ2OgMYEd7HH3'];
 
+const STORAGE_KEY_ATTEMPTS = 'wod_auth_remaining_attempts';
+const STORAGE_KEY_LOCKOUT_UNTIL = 'wod_auth_lockout_until';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -46,7 +49,58 @@ export class AuthService implements OnDestroy {
   private lockoutTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
+    this.restoreRateLimitState();
     this.initFirebase();
+  }
+
+  private restoreRateLimitState(): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      const lockoutUntilStr = localStorage.getItem(STORAGE_KEY_LOCKOUT_UNTIL);
+      const lockoutUntil = lockoutUntilStr ? parseInt(lockoutUntilStr, 10) : 0;
+      const now = Date.now();
+
+      if (lockoutUntil > now) {
+        const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+        this.remainingAttempts.set(0);
+        this.startLockoutTimer(remainingSec);
+        return;
+      }
+
+      if (lockoutUntil > 0 && lockoutUntil <= now) {
+        localStorage.removeItem(STORAGE_KEY_LOCKOUT_UNTIL);
+        localStorage.setItem(STORAGE_KEY_ATTEMPTS, '5');
+        this.remainingAttempts.set(5);
+        return;
+      }
+
+      const storedAttempts = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
+      if (storedAttempts !== null) {
+        const parsed = parseInt(storedAttempts, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 5) {
+          this.remainingAttempts.set(parsed);
+          if (parsed === 0) {
+            this.startLockoutTimer(60);
+          }
+        }
+      }
+    } catch {
+      // Ignorar excepciones de acceso a localStorage
+    }
+  }
+
+  private persistRateLimitState(attempts: number, lockoutUntil: number | null): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      localStorage.setItem(STORAGE_KEY_ATTEMPTS, attempts.toString());
+      if (lockoutUntil && lockoutUntil > Date.now()) {
+        localStorage.setItem(STORAGE_KEY_LOCKOUT_UNTIL, lockoutUntil.toString());
+      } else {
+        localStorage.removeItem(STORAGE_KEY_LOCKOUT_UNTIL);
+      }
+    } catch {
+      // Ignorar excepciones de acceso a localStorage
+    }
   }
 
   ngOnDestroy(): void {
@@ -94,6 +148,7 @@ export class AuthService implements OnDestroy {
       this.remainingAttempts.set(5);
       this.lockoutSeconds.set(0);
       if (this.lockoutTimer) clearInterval(this.lockoutTimer);
+      this.persistRateLimitState(5, null);
       if (userCredential.user && userCredential.user.email) {
         this.currentUserEmail.set(userCredential.user.email);
         this.currentUserId.set(userCredential.user.uid);
@@ -117,7 +172,7 @@ export class AuthService implements OnDestroy {
       return;
     }
 
-    const current = this.remainingAttempts() - 1;
+    const current = Math.max(0, this.remainingAttempts() - 1);
     this.remainingAttempts.set(current);
 
     // Audit log failed attempt asynchronously
@@ -128,9 +183,12 @@ export class AuthService implements OnDestroy {
     ).catch(() => {});
 
     if (current > 0) {
+      this.persistRateLimitState(current, null);
       const plural = current === 1 ? 'intento' : 'intentos';
       this.loginError.set(`Correo o contraseña incorrectos. Te ${current === 1 ? 'queda' : 'quedan'} ${current} ${plural}.`);
     } else {
+      const lockoutUntil = Date.now() + 60 * 1000;
+      this.persistRateLimitState(0, lockoutUntil);
       this.startLockoutTimer(60);
     }
   }
@@ -147,6 +205,7 @@ export class AuthService implements OnDestroy {
         this.lockoutTimer = null;
         this.lockoutSeconds.set(0);
         this.remainingAttempts.set(5);
+        this.persistRateLimitState(5, null);
         this.loginError.set('Ya puedes intentar iniciar sesión nuevamente.');
       } else {
         this.lockoutSeconds.set(remaining);

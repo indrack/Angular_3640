@@ -87,7 +87,7 @@ jobs:
           fi
 
       - name: 📸 Guardar Capturas de Pantalla como Artefacto de Inspección
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: crosshero-screenshots
