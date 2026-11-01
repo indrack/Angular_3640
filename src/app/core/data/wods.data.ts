@@ -4,188 +4,203 @@ export const WODS_DATA: DayWods = {
   domingo: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-8 Deadbugs
-8 Scap Pull-Ups
-8 Kip Swings
-8 PVC Pass-Throughs
-8 PVC Overhead Squats
-8 PVC Muscle Snatches`
+      contenido: `*2 Sets*
+10 Banded Good mornings
+5 Kip Swing
+5 Scapular Pull Ups
+5 Up-Downs
+5 Push Press Empty barbell
+5 Front Squats Empty barbell`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*10 rounds for time of:*
-5x50ft Shuttle Run
-10 Toes-to-bars
-10 Overhead Squats, 42.5/30`
+      contenido: `4 Rounds for Time
+18 Thrusters (43/30)
+18 Chest-to-Bar Pull-Ups
+18 Burpee Box Jumps (24/20 in)`
     },
     {
       titulo: 'Accesorio',
       contenido: `*4 rounds for quality of:*
-20 Landmine Press, RPE 7
-20 Landmine Twists, RPE 7
-20 Landmine Romanian Deadlifts, RPE 7
-10 reps/side for each movement`
+12 Goblet Spanish Squats, RPE 8
+12 Weighted Hip Thrusts, RPE 8
+Rest 1:30`
     },
   ],
   lunes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
+8 Alternating Spiderman Lunges + Reach
 10 Air Squats
-10 PVC Good Mornings
-10 PVC Pass-Throughs
-5 Inchworms`
+8 Scapular Push Ups
+5 Broad Jumps (reset between reps)`
     },
     {
-      titulo: 'Weightlifting (Power Clean)',
-      contenido: `1x [ 3 Power Cleans + 3 Front Squats + 3 Push Jerks ], RPE 7-8
-*Every 1 min for 15 mins.*
-Use the same weight across sets`
+      titulo: 'Weightlifting (Clean and Jerk)',
+      contenido: `2 Power Clean & Jerks
+*Every 1 min for 8 mins.*
+Start Moderate and Build to Moderate-Heavy`
     },
     {
-      titulo: 'Custom Metcon (Rondas y Reps)',
-      contenido: `AMRAP in 15 minutes
-4 Cycles of 3 Minutes Each
-3 Power Cleans (135/95 lbs)
-6 Push-Ups
-9 Air Squats
-Rest 1 Minute Between Each 3-Minute Cycle
-Complete as many rounds as possible (AMRAP) in 3 minutes, then rest 1 minute. Start each 3-minute cycle where you left off on the previous cycle. Repeat for a total of 4 cycles. Count total rounds and reps completed.`
+      titulo: 'Custom Metcon',
+      contenido: `*EMOM 21*
+1. 15/12 Row Calories
+2. Max Reps Power Cleans, 85/57.5
+3. Rest`
     },
   ],
   martes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
+10 Box Step-Ups (alternating)
+10 Hip Circles (each direction)
 10 Glute Bridges
-10 Hollow Rocks
-10 Walking Lunges (bodyweight)`
+8 Air Squats (3-second lower)`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*3 rounds for time of:*
-30 V-Ups
-100 ft Medicine Ball Walking Lunge, 20/14 lbs
-30 Medicine Ball Box Step Overs, 20/14 lbs, 20 in`
+      contenido: `*Teams of 2*
+10 rounds each round for time, of:
+you go-I go fashion
+50 Double Unders
+5 Back Squats, 92.5/60
+Rest 1:1 between each round.`
     },
     {
       titulo: 'Skill',
-      contenido: `As many reps as possible in 5 mins of:
-1 Wall Walk
-1 Strict Chest-to-bar Pull-up
-2 Wall Walks
-2 Strict Chest-to-bar Pull-ups
-3 Wall Walks
-3 Strict Chest-to-bar Pull-ups
-...
-Continue adding 1 rep each round to each movement until time expires.`
+      contenido: `*3 rounds for quality of:*
+20 Dumbbell Bulgarian Split Squats
+20 Banded Hamstring Curls
+*Rest 1 min*`
     },
   ],
   miercoles: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-10 Kettlebell Deadlifts
-10 Hollow Rocks
-10 Banded Pull-Aparts
-20m High Knees`
-    },
-    {
-      titulo: 'Weightlifting (Deadlift)',
-      contenido: `Deadlift 6-6-6
-Use the heaviest weight you can for each set.
-Rest as needed between sets.`
+      contenido: `*1 ROUND*
+20m A-Skips
+20m High Knees
+20m Butt Kicks
+Banded 7's
+:20 Hollow Hold
+Then Into...
+*2 ROUNDS*
+5 Ring Rows
+5 Push-Ups (Athlete's Level)`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `Helen
-*3 rounds for time of:*
-400 m Run
-21 Kettlebell Swings, 24/16
-12 Pull-ups`
+      contenido: `*EMOM 24*
+1. 300/250 m Row
+2. 10 Strict Pull-ups
+3. Max Push-ups
+4. Rest`
+    },
+    {
+      titulo: 'Skill',
+      contenido: `*5 rounds for quality of:*
+5x [ Ring Hold, 5 secs + Ring Dip Negative, 3 secs ]
+*Rest 1 min*`
     },
   ],
   jueves: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-:45 Easy Row
-8 Alternating Samson Lunges
+      contenido: `*2 Sets*
+100m Run
+8 Box Step-Ups
 8 Air Squats
-8 Scap Push-Ups
-6 Hand Release Push-Ups`
+5 Light Wall Balls
+10 Banded Good Mornings`
     },
     {
-      titulo: 'Custom Metcon',
-      contenido: `*EMOM 18*
-1. 15/12 Row Calories
-2. 10 Thrusters, 42.5/30
-3. Rest`
+      titulo: 'Weightlifting (Deadlift)',
+      contenido: `Deadlift 12-12-12
+Use the heaviest weight you can for each set.
+Rest as needed between sets.`
     },
     {
-      titulo: 'Skill',
-      contenido: `*4 rounds for quality of:*
-8 Strict Press
-12 Hammer Curls
-24 Banded Tricep Extensions
-Rest 1:1
-Strict Press- moderate-heavy
-Hammer Curls- moderate`
+      titulo: 'Custom Metcon (Rondas y Reps)',
+      contenido: `Complete as many rounds as possible in 20 mins of:
+200m Run
+15 Box Step-ups, 20 in
+15 Wall Balls, 20/14 lbs`
     },
   ],
   viernes: [
     {
       titulo: 'Warmup',
-      contenido: `“ROXANNE” - HALLOWEEN EDITION
-Play “Roxanne” by The Police. (Length: 3:14)
-Every time you hear “Roxanne”: 1 Up Down
-Every time you hear “Red Light”: 1 Air Squat
-Keep this fun, you can cut the music early if needed.
-Then into…
-Warm Up Play Day`
+      contenido: `*2 ROUNDS*
+:30  Jump Rope
+8 Scap Push Ups
+8 Alternating Plank Shoulder Taps/Side
+10 PVC Pass Throughs
+8 PVC Good Mornings
+6 Hang Dumbbell Alt. Snatch (light)`
     },
     {
-      titulo: 'Custom Metcon (Rondas)',
-      contenido: `“NIGHTMARE BEFORE HALLOWEEN”
-Teams 3-4
-WOD 1
-Team Relay
-*AMRAP 8*
-10 Synchro Burpee
-20 Synchro Air Squat
-30 Synchro Jumping Jacks
--rest 3 min-
-WOD 2
-Max Reps Wall Balls
-Each team accumulate as many wall ball repetitions ass possible in 5 min
-Only one athlete works at time`
+      titulo: 'Weightlifting (Hang Power Snatch)',
+      contenido: `1x [ 5 Hang Power Snatches + 5 Snatch Grip Push Press ]
+*Every 1:30 for 9 mins.*
+Start Light and Build to Moderate`
+    },
+    {
+      titulo: 'Custom Metcon',
+      contenido: `*For time:*
+20 Alternating Dumbbell Snatches, 22.5/15
+30 Toes-to-bars
+20 Alternating Dumbbell Snatches, 22.5/15
+30 Burpee-to-Targets
+20 Alternating Dumbbell Snatches, 22.5/15
+30 Burpee-to-Targets
+20 Alternating Dumbbell Snatches, 22.5/15
+30 Toes-to-bars
+20 Alternating Dumbbell Snatches, 22.5/15
+*Time cap: 20 mins*`
     },
   ],
   sabado: [
     {
       titulo: 'Warmup',
-      contenido: `''GHOSTBUSTERS'' - HALLOWEEN EDITION
-Ghostbusters - Ray Parker jr
-Play Ghostbusters by Ray Parker jr (Length: 3:45)
-Every time you hear “Ghostbusters”: 1 Burpee
-Every time you hear “Ghost”: 1 Air Squat
-Every time you hear “Bustin”: 2 Jumping Jacks
-Keep this fun, you can cut the music early if needed.
+      contenido: `2 min Cardio of choice
 Then into…
-Warm Up Play Day`
+1-2 ROUNDS
+5 Push-ups
+5 Air Squats (Goblet Squats in Round 2)
+5 Kettlebell Swings (Kettlebell High Pull in Round 2)
+5 Pull Ups or Ring Rows (Chest to Bar for Freedom in Round 2)
+5 Step-Ups (Box Jumps in Round 2)`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `''TEAM HALLOWEEN''
-*Teams of 2*
-*For Time*
-75 Lateral Pumpkin Burpee
-50 Pumpkin Push Press
-100 Pumpkin Goblet Squat
-75 Pumpkin Slams
-50 Partner Pumpkin Pass
-Use a Slam Balls as your Pumpkin`
+      contenido: `*For time:*
+22 Push-ups
+22 Air Squats
+22 Kettlebell Swings, 53/35 lbs
+22 Pull-ups
+22 Deadlifts, 95/65 lbs
+22 Push Press, 95/65 lbs
+22 Box Jumps, 24/20 in
+22 Burpees
+22 Kettlebell Goblet Squats, 53/35 lbs
+22 Lunges
+22 Toes-to-bars
+22 Hang Power Cleans, 95/65 lbs
+22 Thrusters, 95/65 lbs
+22 Box Jump Overs, 24/20 in
+22 Hand Release Push-ups
+22 Kettlebell High-pulls, 53/35 lbs
+22 Reverse Lunges
+22 Chest-to-bar Pull-ups
+22 Front Squats, 95/65 lbs
+22 Power Snatches, 95/65 lbs
+22 Burpee Box Jump Overs, 24/20 in
+22 Push-ups
+*Time cap: 50 mins*
+*Complete in teams of 2.*
+*Each partner completes 22 reps of each movement, but may break into sets back and forth as desired.`
     },
   ],
 };
