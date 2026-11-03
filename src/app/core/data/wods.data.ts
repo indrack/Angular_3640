@@ -93,7 +93,7 @@ Then Into...
     {
       titulo: 'Custom Metcon',
       contenido: `*EMOM 24*
-1. 300/250 m Row
+1. Max Shuttle Runs
 2. 10 Strict Pull-ups
 3. Max Push-ups
 4. Rest`
