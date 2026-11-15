@@ -4,24 +4,25 @@ export const WODS_DATA: DayWods = {
   domingo: [
     {
       titulo: 'Warmup',
-      contenido: `*2 ROUNDS*
-10 Arm Circles Forward + Backward
-8 Alternating World's Greatest Stretch
-10 Air Squats
-:20 Front Plank
-50ft Light Dumbbell Farmer Carry`
+      contenido: `EVERY 1:00 (9:00)
+MIN 1 → :50 Single Unders
+MIN 2 → : 3 Inchworms + 3 Jump to Top of Ring Dip + Slow negative (or 5 Box Dips)
+MIN 3 → 10 Dumbbell Deadlifts + 5 Dumbbell Hang Power Cleans (light)
+-repeat for 3 sets-`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*For time:*
-50 x 50ft Dumbbell Farmer Carry, 22.5/15
-Every time you break complete:
-25 Air Squats`
+      contenido: `*5 rounds for time of:*
+50 Double Unders
+15 Ring Dips
+100 ft DB Farmer Carry, 70/45
+5 DB Power Cleans (Heavy)  70/45`
     },
     {
       titulo: 'Accesorio',
-      contenido: `*3 rounds for quality of:*
-15 Reverse Hypers/ Prone Superman
+      contenido: `*4 rounds for quality of:*
+15 Banded Good Mornings
+15 Glute Bridges
 Hollow Hold, 45 secs
 *Rest 1 min*`
     },
@@ -30,165 +31,130 @@ Hollow Hold, 45 secs
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-8 Alternating Spiderman Lunges + Reach
-10 Air Squats
-10 PVC Pass Throughs
-5 Broad Jumps (reset between reps)`
+5 Kang Squats
+5 Alternating Step Back Lunges (each leg)
+10 Alternating Plank Shoulder Taps
+5 DB Strict Press (light)`
     },
     {
-      titulo: 'Weightlifting (Power Snatch)',
-      contenido: `Power Snatch 2-2-2-2-2-2-2-2-2-2
-Use the heaviest weight you can for each set.
-Rest 1 min between sets.`
+      titulo: 'Weightlifting (Back Squat)',
+      contenido: `6 Back Squats, RPE 7
+*Every 2 mins for 10 mins.*`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*For time:*
-9 Power Snatches, 60/42.5
-9 Burpee Bar Muscle-ups
-7 Power Snatches, 60/42.5
-7 Burpee Bar Muscle-ups
-5 Power Snatches, 60/42.5
-5 Burpee Bar Muscle-ups`
+      contenido: `*EMOM 16*
+1. 250/200 Row
+2. 10 Strict Handstand Push-ups
+3. 20 Dumbbell Goblet Reverse Lunges, 22.5/15
+4.Rest`
     },
   ],
   martes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-5 Inchworms
-10 Leg Swings (each leg)
-5 Scapular Pull Ups
-:20 Hollow Rock`
+5 World's Greatest Stretch (each side)
+10 PVC Pass Throughs
+10 PVC Good Mornings
+10 Pogo Hops`
+    },
+    {
+      titulo: 'Weightlifting (Clean and Jerk)',
+      contenido: `5 Power Clean & Jerks
+*Every 2 mins for 10 mins.*
+All 5 Reps must be Touch and Go.
+Start Moderate and Build to Moderate-Heavy (RPE 8)`
     },
     {
       titulo: 'Custom Metcon',
       contenido: `*For time:*
-200 Double Under
-50 Sit-ups
-200 Double Under
-50 Toes-to-bars
-*Time cap: 21 mins*`
-    },
-    {
-      titulo: 'Skill',
-      contenido: `Tabata Strict Press, 20/15
-*Rest 2 mins*
-Tabata Bent Over Barbell Row, 20/15`
+10 Box Jumps, 30/24 in
+50 Deadlifts, 52.5/35
+10 Box Jumps, 30/24 in
+40 Hang Power Cleans, 52.5/35
+10 Box Jumps, 30/24 in
+30 Shoulder-to-Overheads, 52.5/35
+10 Box Jumps, 30/24 in
+20 Power Clean & Jerks, 52.5/35
+10 Box Jumps, 30/24 in
+*Time cap: 20 mins*`
     },
   ],
   miercoles: [
     {
       titulo: 'Warmup',
-      contenido: `3:00 AMRAP
-10 Alternating Lunges
-4 Box Step Ups
-3 Worlds Greatest Stretch (each side)
-10 Deadbugs
-CHAD
-*For Time*
-1,000 Box Step-Ups (20 in)
-Wear a Ruck Pack (45/35 lb)
-Complete 1,000 Weighted Box Step-Ups as fast as possible. Use a 20 inch Box and wear a Ruck Pack that weighs 45/35 lb for men/women.
-A Ruck is a weighted Backpack to simulate the gear carried during a hiking expedition.
-Score is the time it takes to complete all 1,000 repetitions.`
-    },
-    {
-      titulo: 'Accesorio',
-      contenido: `*3 rounds for quality of:*
-20 Banded Paloff Press
-Copenhagen Plank, 1:30
-*Rest 1 min*`
+      contenido: `2:00 Cardio
+Banded 7s
+10 Hip Halos (each direction)
+:20 Hollow Hold
+:20 Superman Hold
+Barbara
+5 Rounds For Time
+20 PullUps
+30 Push-Ups
+40 Sit-Ups
+50 Air Squats
+3 Minutes Rest
+Time each round. Score is total time to complete the workout.`
     },
   ],
   jueves: [
     {
-      titulo: 'Warmup',
-      contenido: `*2 Rounds*
-10 Scap Pull Ups
-10 Alternating Plank Shoulder Taps
-10 Deadbugs
-10 Glute Bridges
-5 Ring Rows
-3 Zombie Rope Climbs (or 10 Ring Rows)`
-    },
-    {
-      titulo: 'Gymnastics (Rope Climb)',
-      contenido: `*ON A 8:00 CLOCK...*
-Rope Climb Practice (descending)
-Freedom (Advanced) - Rope Climb + Descending (Rope sliding between the Foot Lock)
-Independence (Intermediate) - Rope Climb + Descending (Hand-over-hand descent with Rope Sliding between the Foot Lock)
-Liberty (Beginner) - Zombie Rope Climbs/Foot Clamp and Stand`
-    },
-    {
-      titulo: 'Custom Metcon',
-      contenido: `3 rounds, 3 mins each, for max reps of:
-10 50ft Shuttle Run
-3 Rope Climbs / 15 Strict Pull-ups
-max reps in remaining time Dumbbell floor Press, 50/35 lbs
-*Rest 1 min*
--- then --
-In 4 mins, for max reps of:
-10 50ft Shuttle Run
-3 Rope Climbs
-max reps in remaining time Dumbbell Bench Press, 50/35 lbs`
+      titulo: 'DESCANSO',
+      contenido: `Box Cerrado / Open Box`
     },
   ],
   viernes: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-10 Hip Circles (each direction)
-8 Cossack Squats (alternating)
-10 Glute Bridges
-:20 Hollow Hold
-10 Good Mornings (PVC or empty bar)`
+10 Glute Bridges (Squeeze at the Top)
+8 Alternating World's Greatest Stretch
+10 Banded Good Mornings
+10 Bird Dogs
+:20 Dead Bug Hold`
     },
     {
       titulo: 'Weightlifting (Deadlift)',
-      contenido: `Deadlift 10-10-10
+      contenido: `Deadlift 8-8-8
 Use the heaviest weight you can for each set.
 Rest as needed between sets.`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*EMOM  16*
-1. 15/12 Row Calories
-2. 15 Wall Balls, 20/14 lbs
-3. Max Reps V-Ups
-4. Rest`
+      contenido: `*For time:*
+21-15-9-6-3
+Lateral Burpee Over Dumbbells
+Alternating Dumbbell Snatches, 32.5/22.5
+*Time cap: 12 mins*`
     },
   ],
   sabado: [
     {
       titulo: 'Warmup',
       contenido: `*2 ROUNDS*
-10 PVC Good Mornings
-8 Alternating Spiderman Lunges + Reach
 10 Air Squats
-10 Glute Bridges
-5 Broad Jumps (reset between reps)`
-    },
-    {
-      titulo: 'Weightlifting (Hang Power Clean)',
-      contenido: `Hang Power Clean 1x1
-Use the heaviest weight you can for the set.
-*ON A 10:00 CLOCK...*
-Build up to Mod-Heavy Single Hang Power Clean`
+5/Side Worlds Greatest Stretch
+10 PVC or Banded Good Mornings
+5 Push Up into Downward Dog
+10 Scapular Pull Ups (slow and controlled)`
     },
     {
       titulo: 'Custom Metcon',
-      contenido: `*Teams of 2.*
-*For time:*
-30 Hang Power Cleans, 70/47.5
-15 Synchronized Bar Facing Burpees
-30 Hang Power Cleans, 70/47.5
-15 Synchronized Bar Facing Burpees
-30 Hang Power Cleans, 70/47.5
-15 Synchronized Bar Facing Burpees
-30 Hang Power Cleans, 70/47.5
-15 Synchronized Bar Facing Burpees
-*Time cap: 15 mins*`
+      contenido: `*4 rounds for time of:*
+*Teams of 2.*
+4 Rope Climbs / 20 Strict Pull-ups
+40 Wall Balls, 20/14 lbs
+400 m Partner Run ( together)`
+    },
+    {
+      titulo: 'Accesorio',
+      contenido: `*4 rounds for quality of:*
+20 Calf Raises
+20 Banded Chest Flies
+Hollow Hold, 45 secs
+*Rest 1 min*`
     },
   ],
 };
