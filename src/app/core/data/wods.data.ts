@@ -101,8 +101,31 @@ Time each round. Score is total time to complete the workout.`
   ],
   jueves: [
     {
-      titulo: 'DESCANSO',
-      contenido: `Box Cerrado / Open Box`
+      titulo: 'Warmup',
+      contenido: `*2 Rounds*
+6 Up Downs
+10 Roll and Reach
+10 Banded Pull Aparts
+10 Glute Bridges
+20 Single Unders`
+    },
+    {
+      titulo: 'Skill',
+      contenido: `*ON A 10:00 CLOCK*
+Triple Under, Double Under, or Single Under Practice
+Freedom (Advanced) - Triple Under Practice
+Independence (Intermediate) - Double Unders or Crossover Singles Practice
+Liberty (Beginner) - Single Under or Crossover Single Practice`
+    },
+    {
+      titulo: 'Custom Metcon',
+      contenido: `*For time:*
+*4 Rounds*
+50 Double Unders
+15 Wall Balls 20/14
+15 Box Jumps Overs
+15 Kettle Swings
+*Time cap: 16 mins*`
     },
   ],
   viernes: [
